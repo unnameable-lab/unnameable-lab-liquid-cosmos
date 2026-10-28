@@ -1,0 +1,1255 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#06050f"><title>Liquid Cosmos — Relief</title><style>
+*{box-sizing:border-box}body{margin:0;background:#06050f;color:#eee;font-family:Arial,'Noto Sans',sans-serif;overflow:hidden}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+body.pillar{background:#000}body.pillar canvas{left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);width:var(--pw);height:var(--ph);box-shadow:0 0 60px rgba(255,140,60,.25),0 0 2px rgba(255,255,255,.2)}
+header{position:fixed;top:36px;left:38px;pointer-events:none;text-shadow:0 2px 20px #000}h1{font-size:13px;letter-spacing:.29em;font-weight:400;margin:0 0 10px}.sub{font-size:10px;letter-spacing:.18em;opacity:.6}
+.tuning{position:fixed;left:22px;bottom:28px;background:#090817b3;border:1px solid #ffffff25;border-radius:18px;padding:12px 16px;backdrop-filter:blur(18px);width:240px;font-size:12px;max-height:70vh;overflow:auto}.tuning summary{cursor:pointer;color:#ddd}.tuning label{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:13px}.tuning input[type=range]{grid-column:1/-1;width:100%;accent-color:#9abfff}.tuning output{font-variant-numeric:tabular-nums;color:#b7cdff}
+.btn{color:#ddd;background:#08071355;border:1px solid #ffffff25;border-radius:22px;padding:10px 16px;font:12px Arial;cursor:pointer;backdrop-filter:blur(8px)}.btn.active{background:#ffffff25;color:#fff}.top{position:fixed;right:20px;top:23px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.controls{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:6px;background:#09081799;border:1px solid #ffffff25;border-radius:30px;backdrop-filter:blur(18px);max-width:96vw;flex-wrap:wrap;justify-content:center}.controls .btn{border:0;background:transparent;padding:10px 12px}.controls .btn.active{background:#ffffff25}
+.tuning{bottom:84px}
+.hide .recordbar{display:none}.hide .top #pause{display:none}
+.hide header,.hide .tuning,.hide .controls{display:none}#error{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#181329;padding:24px;border-radius:16px;font-size:14px;max-width:80vw;white-space:pre-wrap}
+@media(max-width:600px){header{top:25px;left:23px}.tuning{left:16px;width:220px;bottom:150px;max-height:50vh}.controls .btn{padding:10px 9px;font-size:11px;flex-shrink:0;white-space:nowrap}.controls{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;width:max-content;border-radius:22px;scrollbar-width:none}.controls::-webkit-scrollbar{display:none}}
+.recordbar{position:fixed;right:22px;top:68px;display:flex;align-items:center;gap:8px;background:#080713aa;border:1px solid #ffffff25;border-radius:24px;padding:4px;backdrop-filter:blur(16px)}.recordbar button{font-size:12px}.recordbar.running{border-color:#ff6e8a88}.recordbar.running button{color:#ff9db2}#recordStatus{font-size:11px;padding-right:12px;color:#ddd}#recordStatus:empty{display:none}.notice{position:fixed;top:118px;right:25px;max-width:min(320px,86vw);font-size:11px;line-height:1.7;color:#eee;background:#080713bb;padding:10px 14px;border-radius:12px;pointer-events:none}.notice:empty{display:none}dialog{color:#eee;border:1px solid #ffffff30;background:#11101d;border-radius:20px;padding:22px;width:min(440px,90vw);max-height:88vh;overflow:auto}dialog::backdrop{background:#0009;backdrop-filter:blur(8px)}dialog h2{font-size:16px;font-weight:400;margin-top:0}dialog video{display:block;width:100%;max-height:49vh;background:#000;border-radius:10px}dialog p{font-size:12px;line-height:1.7;color:#bbb}.save-actions{display:flex;gap:8px;flex-wrap:wrap}.save-actions a{color:#111;background:#e4dcff;padding:12px 16px;border-radius:22px;text-decoration:none;font-size:12px}.save-actions button{background:#ffffff12}button:disabled{opacity:.4;cursor:default}@media(max-width:600px){.recordbar{top:73px;right:16px}.notice{top:122px;right:16px}}
+#recordDuration,#recordQuality{color:#eee;background:#171322;border:1px solid #ffffff25;border-radius:16px;padding:7px;font-size:12px;max-width:75px}#recordStatus{font-variant-numeric:tabular-nums}@media(max-width:600px){#recordStatus{font-size:10px;padding-right:6px}.recordbar{gap:3px}}
+.recordbar{top:72px}.top{top:23px}
+</style></head><body><canvas id="c"></canvas><header><h1>LIQUID COSMOS</h1><div class="sub" id="subT">流れる宇宙 / 光の習作 88 — レリーフと光（渦性・無機性・波性・生き物性） レリーフと光（5シーン・移ろい）</div><div class="sub" id="tideHud" style="margin-top:8px;opacity:.85"></div></header>
+<div class="top"><button class="btn" id="pause">Ⅱ 停止</button><button class="btn" id="pillar">柱</button><button class="btn" id="freeze">❄ 凍る</button><button class="btn" id="immersive">没入 ↗</button></div>
+<nav class="controls" aria-label="シーン"><button class="btn active" id="sun">陽光</button><button class="btn" id="mito">紅</button><button class="btn" id="blue">宵</button><button class="btn" id="morpho">螺鈿</button><button class="btn" id="steam">虹油</button><button class="btn" id="gold">緑金</button><button class="btn" id="pastel">薄虹</button><button class="btn" id="mono">モノクロ</button><button class="btn" id="cycle">移ろい</button></nav>
+<div class="recordbar" id="recordbar"><button id="record">● 録画</button><select id="recordDuration" aria-label="録画時間"><option value="15">15秒</option><option value="30" selected>30秒</option><option value="60">60秒</option><option value="180">3分</option><option value="300">5分</option><option value="600">10分</option></select><select id="recordQuality" aria-label="録画画質"><option value="720">720p</option><option value="1080" selected>1080p</option><option value="1440">1440p</option></select><span id="recordStatus" role="status"></span></div><div id="notice" class="notice" role="status" aria-live="polite"></div><dialog id="recordResult" aria-labelledby="recordTitle"><h2 id="recordTitle">録画できました</h2><video id="recordPreview" controls playsinline></video><p id="recordInfo"></p><div class="save-actions"><a id="downloadVideo">動画を保存</a><button id="shareVideo">共有・端末に保存</button><button id="closeResult">閉じる</button></div></dialog>
+<details class="tuning" open><summary>表面と光の調整</summary>
+<label>描画解像度（長辺） <select id="resSel" style="color:#eee;background:#171322;border:1px solid #ffffff25;border-radius:12px;padding:4px 8px"><option value="auto" selected>自動（1440）</option><option value="1080">1080</option><option value="1440">1440</option><option value="2160">2160</option></select></label>
+<label>描画速度 <output id="o_fps">—</output></label>
+<label>渦の位置（診断） <output id="o_vpos">—</output></label><label>環境（診断） <output id="o_env" style="white-space:normal;font-size:10px">—</output></label>
+<label>軽量モード（スマホ向け） <output id="o_lite">auto</output><input id="lite" type="range" min="0" max="1" step="1" value="0"></label>
+<label>時間アンチエイリアス <output id="o_taa">on</output><input id="taa" type="range" min="0" max="1" step="1" value="1"></label>
+<label>細胞模様（反応拡散） <output id="o_rdamt">1.0×</output><input id="rdamt" type="range" min="0" max="200" value="100"></label>
+<label>うねりの速さ <output id="o_speed">1.0×</output><input id="speed" type="range" min="0" max="300" value="100"></label>
+<label>起伏の高さ <output id="o_relief">1.0×</output><input id="relief" type="range" min="0" max="300" value="100"></label>
+<label>稜線の細かさ <output id="o_ridge">1.0×</output><input id="ridge" type="range" min="0" max="300" value="100"></label>
+<label>反射の強さ <output id="o_reflect">1.0×</output><input id="reflect" type="range" min="0" max="300" value="100"></label>
+<label>ハイライト <output id="o_spec">1.0×</output><input id="spec" type="range" min="0" max="300" value="100"></label>
+<label>レンズの屈折 <output id="o_lens">1.0×</output><input id="lens" type="range" min="0" max="300" value="100"></label>
+<label>渦の動き <output id="o_vmove">2.0×</output><input id="vmove" type="range" min="0" max="300" value="200"></label>
+<label>潮 <select id="tideMode" style="color:#eee;background:#171322;border:1px solid #ffffff25;border-radius:12px;padding:4px 8px"><option value="0">架空</option><option value="1">東京湾（いま）</option><option value="2">東京湾（今日を早回し）</option></select></label><label>潮の速さ（1日＝<span id="o_dayLen">40</span>秒） <output id="o_tide">1.0×</output><input id="tide" type="range" min="0" max="400" value="100"></label>
+<label>分潮の強さ <output id="o_tideamt">1.0×</output><input id="tideamt" type="range" min="0" max="100" value="100"></label>
+<label>風波の強さ <output id="o_waveamt">0.6×</output><input id="waveamt" type="range" min="0" max="100" value="60"></label>
+<label>非線形の強さ <output id="o_nonlin">1.0×</output><input id="nonlin" type="range" min="0" max="100" value="100"></label>
+<label>顔料の比率 <output id="o_pig">0.9×</output><input id="pig" type="range" min="0" max="100" value="90"></label>
+<label>発光 <output id="o_glow">1.0×</output><input id="glow" type="range" min="0" max="200" value="100"></label>
+<label>模様の流れ <output id="o_flow">5.0×</output><input id="flow" type="range" min="0" max="800" value="500"></label>
+<label>沸騰 <output id="o_boil">2.0×</output><input id="boil" type="range" min="0" max="300" value="200"></label>
+<label>立体感 <output id="o_depth">1.0×</output><input id="depth" type="range" min="0" max="200" value="100"></label>
+<label>細胞モザイク <output id="o_cell">1.0×</output><input id="cell" type="range" min="0" max="100" value="100"></label>
+<label>描き込み <output id="o_detail">1.0×</output><input id="detail" type="range" min="0" max="200" value="100"></label>
+<label>LEDの粒 <output id="o_led">0.15×</output><input id="led" type="range" min="0" max="100" value="15"></label>
+<label>輝点 <output id="o_spark">0.6×</output><input id="spark" type="range" min="0" max="300" value="60"></label>
+<label title="同じ数を入れると同じ始まりになります">種 <span><input id="seed" type="number" min="1" max="99999" style="width:72px;background:#ffffff12;color:#eee;border:1px solid #ffffff30;border-radius:8px;padding:3px 6px"> <button class="btn" id="reseed" type="button" style="padding:4px 10px">引き直す</button></span></label><label>渦の数 <output id="o_vcount">2</output><input id="vcount" type="range" min="1" max="4" step="1" value="2"></label>
+<label>自然に凍る（2分半ごと） <output id="o_freezeauto">off</output><input id="freezeauto" type="range" min="0" max="100" step="100" value="0"></label><label>流体の移流（0で数式の歪みだけ） <output id="o_fluid">1.0×</output><input id="fluid" type="range" min="0" max="100" value="100"></label><label>液体の質感（0で破片） <output id="o_liquid">1.0×</output><input id="liquid" type="range" min="0" max="100" value="100"></label><label>触れ合いの回転 <output id="o_orbit">1.0×</output><input id="orbit" type="range" min="0" max="200" value="100"></label><label>左右をつなぐ <output id="o_wrap">off</output><input id="wrap" type="range" min="0" max="100" step="100" value="0"></label>
+<label>拍動の強さ <output id="o_beat">0.0×</output><input id="beat" type="range" min="0" max="200" value="0"></label>
+<label>拍動の間隔 <output id="o_beatint">4.0×</output><input id="beatint" type="range" min="100" max="1000" value="400"></label>
+<label>移ろいの間隔 <output id="o_hold">20秒</output><input id="hold" type="range" min="5" max="90" value="20"></label>
+</details><div id="error"></div>
+
+<script id="frag" type="x-shader/x-fragment">
+precision highp float;
+uniform vec2 res;uniform float time,reliefAmt,ridgeAmt,reflectAmt,specAmt,lensAmt;uniform float scene[5];uniform float sceneP[6];uniform float cellAmt;  // 青,黄金,ミトコンドリア,モルフォ,スチームパンク の重み
+uniform sampler2D hTex;uniform sampler2D fluidTex;uniform float fluidAmt;uniform float heightPass,depthAmt,boilAmt,flowK,glowAmt,monoAmt,pastelAmt,liquidAmt;
+uniform vec3 cores[4];uniform vec2 vels[4];uniform float spins[4];uniform vec2 lagCores[4];uniform float wrapW;uniform float tidePh[4];uniform float tideA[4];uniform float tideLvl;uniform float tideT,tideAmt,pulse,peri,nonlin,rdAmt,lite;uniform vec2 jitter;uniform sampler2D rdTex;
+float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float tanh_(float x){x=clamp(x,-10.,10.);float e=exp(2.*x);return (e-1.)/(e+1.);}
+vec2 tanh2(vec2 v){return vec2(tanh_(v.x),tanh_(v.y));}
+// 結晶の面：ボロノイのセルごとに一定の勾配（区分的平面）。面の境目で法線が折れる
+float facets(vec2 p){
+ vec2 q=p*1.6;vec2 c=floor(q);float best=1e9;vec2 bc=vec2(0.);
+ for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 id=c+vec2(float(x),float(y));vec2 pt=id+vec2(hash21(id),hash21(id+5.));float d=length(q-pt);if(d<best){best=d;bc=pt;}}
+ vec2 g=(vec2(hash21(bc+11.),hash21(bc+17.))-.5)*.9;
+ return dot(q-bc,g);
+}
+float noise2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int k=0;k<4;k++){s+=a*noise2(p);p=mat2(.8,-.6,.6,.8)*p*2.03+3.7;a*=.5;}return s;}
+// 稜線ノイズ：谷ではなく尾根が鋭くなる。光が走る線はここから出る
+float ridged(vec2 p){float s=0.,a=.5;for(int k=0;k<4;k++){float n=1.-abs(2.*noise2(p)-1.);s+=a*n*n;p=mat2(.8,-.6,.6,.8)*p*2.2+1.3;a*=.55;}return s;}
+// 高さ場：広いうねり ＋ 細かい稜線 ＋ 渦（椀状に沈み、縁がわずかに盛り上がる）
+// 分潮：振幅比 M2:S2:K1:O1 ≈ 1:.46:.58:.41、周期は時間単位「1日」で 12.42h/12.00h/23.93h/25.82h。波数ベクトルは各分潮で向きを変える
+float tide(vec2 p,float T){
+ const float TAU=6.2831853;
+ float d=T;                                   // T は「日」
+ const float EPS=.22;                          // Stokes 2次項の比。峰が尖り、谷が平らになる
+ // 位相と振幅はJSから（架空の潮、または東京の調和定数から計算した実際の潮）
+ float t1=tidePh[0]+dot(p,vec2(.55,.30));
+ float t2=tidePh[1]+dot(p,vec2(-.40,.45));
+ float t3=tidePh[2]+dot(p,vec2(.20,-.60));
+ float t4=tidePh[3]+dot(p,vec2(-.62,-.18));
+ float m2=cos(t1)+EPS*cos(2.*t1), s2=cos(t2)+EPS*cos(2.*t2), k1=cos(t3)+EPS*cos(2.*t3), o1=cos(t4)+EPS*cos(2.*t4);
+ return (tideA[0]*m2+tideA[1]*s2+tideA[2]*k1+tideA[3]*o1)/(2.45*(1.+EPS));
+}
+// 瑪瑙の縞：渦のまわりの距離を幅の違う硬い帯に量子化。x=段差の高さ、y=帯ごとの色の明暗
+// 左右の周期境界：渦との差は、いちばん近い写し（左右に幅ぶんずらした渦）で測る
+vec2 wd(vec2 d){if(wrapW>0.)d.x-=wrapW*floor(d.x/wrapW+.5);return d;}
+vec2 agate(vec2 p){
+ float step_=0.,tint=0.,wsum=0.;
+ for(int i=0;i<4;i++){
+  vec2 d=wd(p-cores[i].xy);float L=length(d)/cores[i].z;
+  float ang=atan(d.y,d.x);
+  float u=L*4.5+.35*sin(ang*3.+float(i))+.5*fbm(p*1.2+float(i)*3.);   // 帯の位相（少し歪ませる）
+  float b=floor(u),f=fract(u);
+  float width=.4+.5*hash21(vec2(b,float(i)));                           // 帯の幅はばらつく
+  float edge=smoothstep(.0,.06,f)*(1.-smoothstep(width,width+.06,f));   // 硬い縁
+  float w=exp(-pow(max(L-1.1,0.)/.9,2.))*smoothstep(1.0,1.2,L);
+  step_+=w*(hash21(vec2(b+7.,float(i)))-.5)*.5*edge;
+  tint+=w*(hash21(vec2(b+3.,float(i)))-.5)*edge;wsum+=w;
+ }
+ return vec2(step_,tint);
+}
+// 風波：ω²=g·k の分散関係を持つ12成分。長い波ほど速い。振幅はk⁻²（Phillips型）。主方向±35°に散らす
+uniform float waveAmt;
+float windWaves(vec2 p,float t){
+ // 渦の椀＝浅い場所：波数を局所的に増やす（波長が縮み、渦のまわりで波が曲がる）
+ vec2 pw=p;
+ vec2 U=vec2(0.);                                            // 渦が誘導する流れ（正則化した点渦）
+ for(int i=0;i<4;i++){vec2 d=wd(p-cores[i].xy);float L=length(d)/cores[i].z;float w=exp(-L*L*.3);pw+=d*w*.35;
+  float handed=(mod(float(i),2.)<.5)?1.:-1.;float G=handed*cores[i].z*cores[i].z*11.0;
+  for(int m=-1;m<=1;m++){if(m!=0&&wrapW<=0.)continue;vec2 dm=p-cores[i].xy-vec2(float(m)*wrapW,0.);   // 周期のときは左右の写しも足す（継ぎ目が出ない）
+   U+=G/6.2831853*vec2(-dm.y,dm.x)/(dot(dm,dm)+cores[i].z*cores[i].z*.8);}}
+ U=tanh2(U*1.5)/1.5;                                          // 有界化
+ float sum=0.,norm=0.;const float g=2.0;
+ for(int j=0;j<12;j++){
+  if(lite>.5&&j>=6)break;
+  float fj=float(j);
+  float k=1.0+4.0*pow(hash21(vec2(fj,1.)),1.5);                 // 波数 1〜5
+  float th=.9+(hash21(vec2(fj,2.))-.5)*1.22;                     // 方向：主方向±35°
+  float om=sqrt(g*k);                                            // 深水の分散関係
+  float a=1./(k*k);                                              // Phillips型の振幅
+  float ph=hash21(vec2(fj,3.))*6.2831853;
+  vec2 kv=k*vec2(cos(th),sin(th));
+  float omD=om+nonlin*dot(kv,U)*.9;                              // ドップラー：流れに乗る波は速く、逆らう波は遅い（＝前面で詰まる）
+  float th_=dot(pw,kv)-omD*t+ph;
+  sum+=a*(cos(th_)+.18*cos(2.*th_)*k*.35);                       // ここにも軽いStokes非対称
+  norm+=a;
+ }
+ return sum/norm;
+}
+// 沸騰：奥から泡が湧き、膨らみながら手前にせり上がり、模様を外へ押し広げて、平らに戻る
+// 戻り値 xy＝模様の押し出し、z＝高さ（せり上がり）
+vec3 boil(vec2 p){
+ if(boilAmt<.01)return vec3(0.);
+ const float G=1.9;                                              // 泡の間隔：数を減らして大きく
+ vec2 cell=floor(p/G);vec3 acc=vec3(0.);
+ for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){
+  vec2 id=cell+vec2(float(x),float(y));
+  vec2 c=(id+.2+.6*vec2(hash21(id+1.1),hash21(id+2.2)))*G;
+  float rate=.06+.05*hash21(id+4.4);
+  float cyc=time*rate*4.+hash21(id+.3);                           // 泡の周期（数秒〜十数秒）
+  float ph=fract(cyc);
+  c+=.25*(vec2(hash21(id+floor(cyc)*.37),hash21(id+floor(cyc)*.53+9.))-.5);   // 毎回少し違う場所から湧く
+  float R=.45+.55*hash21(id+5.5+floor(cyc));
+  float r=R*(.15+.85*sqrt(ph));                                    // 膨らむ
+  vec2 d=p-c;float L=length(d);
+  float k=exp(-pow(L/r,2.));
+  float life=smoothstep(0.,.25,ph)*(1.-smoothstep(.55,1.,ph));     // 湧き上がり → 広がって沈む
+  acc.z+=k*life*1.1;
+  acc.xy+=d/max(L,1e-3)*k*life*r*.28;                             // 押し広げは控えめ（同心円の模様を作らない）
+ }
+ // 渦の目玉の中では湧かない
+ float eyeK=1.;for(int i=0;i<4;i++){float Le=length(wd(p-cores[i].xy))/cores[i].z;eyeK*=smoothstep(1.4,2.4,Le);}
+ return acc*boilAmt*eyeK;
+}
+vec2 warpQ(vec2 p){
+ float t=time*.08*flowK;
+ vec2 q=p;
+ // 流体：素材がどこから運ばれてきたか（流れで積み重なった移流の地図）。模様はこの座標の上に描く
+ if(fluidAmt>.01){vec2 uvf=(p/3.5*min(res.x,res.y)+.5*res)/res;q=mix(p,texture2D(fluidTex,clamp(uvf,0.,1.)).xy,fluidAmt);}
+ // 渦が周囲の素材を引き込む：座標を渦のまわりで回転・収縮させ、進行方向と逆に引きずる
+ for(int i=0;i<4;i++){
+  vec2 d=wd(p-lagCores[i]);float R=cores[i].z;float L=length(d)/R;
+  float w=exp(-L*L*.22);
+  float handed=(mod(float(i),2.)<.5)?1.:-1.;
+  // 巻き込み角：静的な回転 ＋ 蓄積位相による差動回転（有界化：巻いては緩む）
+  float wind=2.2*sin(spins[i]*.12);
+  float ang=w*(handed*1.0+wind*exp(-L*L*.15))*(1.-.6*fluidAmt);   // 流体の移流が巻き込みを担う分、式の回転は控えめに
+  vec2 rd=mat2(cos(ang),-sin(ang),sin(ang),cos(ang))*d;
+  rd*=1.-.45*w*(1.-.5*fluidAmt);          // 中心へ収縮（引き込み）
+  q+=(rd-d)-vels[i]*w*1.2;                // 渦が動くと模様が後ろに引きずられる
+ }
+ q+=.9*vec2(fbm(q*.45+vec2(t,0.)),fbm(q*.45+vec2(5.2,-t)))-.45;
+ q+=.50*vec2(fbm(q*1.1+vec2(-t*2.6,t*.9)),fbm(q*1.1+vec2(t*2.,4.)))-.25;   // 速く渦巻く小さめのうねり（局所の変形）
+ q+=flowK*.45*vec2(time*.035,-time*.022+.6*sin(time*.017));        // 模様全体を運ぶ流れ（控えめ）
+ q+=tideAmt*.6*vec2(.15,1.)*tideLvl;                                  // 潮位：上げ潮で模様が上へ、下げ潮で下へ（流れの積分＝潮位）
+ q-=boil(p).xy;                           // 泡が模様を外へ押し広げる
+ return q;
+}
+// 液体の塊：なめらかなボロノイ（指数で混ぜたF1）で、境目が溶け合ったドームを作る。境目は細い谷
+float liquidH(vec2 q){
+ // 流れの向きに引き伸ばした座標で、大きな塊をひとつの段だけ作る
+ vec2 dir=normalize(vec2(fbm(q*.4+7.)-.5,fbm(q*.4+13.)-.5)+1e-3);
+ vec2 a=vec2(dot(q,dir)*.6,dot(q,vec2(-dir.y,dir.x)));               // 流れ方向に約1.7倍長い
+ vec2 x=a*1.35+.6*vec2(fbm(q*.6),fbm(q*.6+5.2));
+ vec2 n=floor(x),f=fract(x);float r=0.;
+ for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j));vec2 o2=vec2(hash21(n+g),hash21(n+g+17.3))*.8+.1;r+=exp(-4.5*length(g+o2-f));}
+ float F1=-log(r)/4.5;                                                // 小さいほど塊の中心（よく溶け合う）
+ float top=smoothstep(.72,.10,F1);top=top*top*(3.-2.*top);                                     // てっぺんは平ら、縁で急に落ちる
+ float lip=exp(-pow((F1-.52)/.10,2.))*.04;                             // 表面張力で縁がぷくっと立つ
+ return top+lip+.025*fbm(x*2.3);                                       // ごく弱いさざ波
+}
+float H(vec2 p){
+ float t=time*.08*flowK;
+ vec2 q=warpQ(p);
+ float big=mix(fbm(q*.5+vec2(0.,t*.5)),.5+.5*tide(q,tideT),tideAmt);          // 大きなうねり：ノイズ⇄分潮
+ float mid=mix(fbm(q*1.3+vec2(3.1,1.7)),.5+.5*windWaves(q,time*.6),waveAmt*(1.-.85*liquidAmt));   // 液体では細かい風波を抑える          // 中くらいの塊：ノイズ⇄風波
+ float rmask=smoothstep(.35,.75,fbm(q*.7+vec2(11.,4.)));          // 稜線が出る領域（全面ではない）
+ vec2 dir=normalize(vec2(fbm(q*.4+7.)-.5,fbm(q*.4+13.)-.5)+1e-3);  // 線の向き（場所ごとに変わる）
+ vec2 aq=vec2(dot(q,dir),dot(q,vec2(-dir.y,dir.x)));
+ float rg=ridged(aq*vec2(.9,7.)+vec2(t*.3,0.));                     // 一方向に細長い＝平行な細線
+ float beat=1.+.14*(pulse-.5);                                   // 拍動（0〜1 の非対称パルス）
+ float perist=sin(aq.x*2.4-peri+1.5*fbm(q*.9))*.5+.5;              // 蠕動：線に沿って進む波
+ float h=big*1.8*beat+mid*.5+(rg*.14*ridgeAmt*rmask*(1.+.35*pulse)+perist*perist*.09*rmask)*(1.-.92*liquidAmt);
+ if(liquidAmt>.01&&lite<.5)h+=liquidAmt*.55*liquidH(q);                 // 液体の塊の盛り上がり
+ // 反応拡散（Gray–Scott）の模様：自己組織化した迷路・斑点・ひだ。局所ごとに違う構造を持ち、生きて変化する
+ float rdv=texture2D(rdTex,fract(q*.22+.5)).g;
+ h+=(smoothstep(.06,.5,rdv)-.35)*.13*rdAmt*(1.+.8*scene[2])*(1.-.8*sceneP[5])*(1.-.9*liquidAmt);   // 陽光では細胞模様を控えめに
+ // ミトコンドリア：クリステ（平行なうねるひだ）を全面に
+ float cristae=sin(aq.y*16.+3.*fbm(q*1.5+2.)+t*2.)*.5+.5;
+ h+=scene[2]*(pow(cristae,2.)*.45*ridgeAmt+rg*.10)*(1.-.75*liquidAmt);
+ // モルフォ蝶：鱗粉の瓦状タイリング（行ごとに半ピッチずらす）
+ vec2 sc=q*7.;sc.x+=step(.5,fract(sc.y*.5))*.5;vec2 sf=fract(sc)-.5;
+ float scale=smoothstep(.55,.15,length(sf*vec2(1.,1.6)));
+ h+=scene[3]*scale*.20*ridgeAmt;
+ // 渦の近傍では渦が表面を支配する：背景の起伏を渦のまわりで減衰させ、リングが背景に揺らされないようにする
+ float calm=1.;
+ for(int i=0;i<4;i++){float L=length(wd(p-cores[i].xy))/cores[i].z;calm*=1.-.85*exp(-L*L*.28);}
+ h+=boil(p).z*(1.-.5*liquidAmt);                             // 泡のせり上がり
+ h*=calm;
+ for(int i=0;i<4;i++){
+  vec2 d=wd(p-cores[i].xy);float L=length(d)/cores[i].z;
+  h-=1.1*exp(-L*L*.6)+.9*depthAmt*exp(-L*L*2.2);   // 中心に向かって深く落ちる漏斗
+  h+=.22*exp(-pow((L-1.4)/.3,2.));
+  h+=.07*sin(L*7.5+1.5*fbm(p*.8))*exp(-L*L*.08)*smoothstep(.9,1.6,L)*(1.-liquidAmt);   // 周囲の同心のうねり（渦に固定、流れない）
+  if(liquidAmt>.01){   // 目の輪を液面のさざ波に：色の帯と同じ位相で盛り上げ、照りが輪に乗るようにする
+   float thR=atan(d.y,d.x),hdR=(mod(float(i),2.)<.5)?1.:-1.;float swA=.45+1.5*(1.-smoothstep(.6,1.9,L));
+   float ueR=mix(5.6,8.,sceneP[5])*pow(L,.8)+swA*sin(2.*thR-hdR*5.*L+spins[i]*.6+float(i))+.25*sin(5.*thR-spins[i]*.3);
+   h+=liquidAmt*.07*(.5+.5*cos(6.2831853*ueR))*smoothstep(.7,1.05,L)*smoothstep(2.6,1.6,L);
+  }
+  float handedH=(mod(float(i),2.)<.5)?1.:-1.;
+  float angH=atan(d.y,d.x);
+  h+=.06*sin(2.*angH-handedH*(4.5*log(L+.35)+spins[i]))*exp(-L*L*.12)*smoothstep(.85,1.4,L);   // 対数螺旋の腕：回転位相で回り続ける
+ }
+ // 4. 砕波の閾値：峰が立ちすぎたら潰す（tanh で飽和させる＝「限界まで立って崩れる」）
+ float cap=1.15;
+ h=mix(h,cap*tanh_(h/cap),nonlin*.8);
+ // 瑪瑙の段差（無機のシーンで強く、有機のシーンでは弱く）
+ float mineral=1.-.7*scene[2]-.5*scene[3];
+ if(lite<.5)h+=agate(p).x*.16*mineral*(1.-liquidAmt);   // 液体では瑪瑙の段差（細い白線の正体）を消す
+ // 結晶の面：領域マスクの中だけ区分的平面に置き換える（背景を平らにして面を乗せる）
+ float fmask=smoothstep(.55,.8,fbm(p*.5+vec2(21.,9.)))*mineral*calm;
+ if(lite<.5)h=mix(h,h*.35+facets(p)*.9,fmask*(1.-liquidAmt));
+ return h*reliefAmt;
+}
+// 環境：上が明るく下が暗い空間に、色の帯が浮いている（液体金属の映り込み用）
+vec3 env(vec3 r){
+ float a=atan(r.z,r.x),b=asin(clamp(r.y,-1.,1.));
+ float s=sin(a*3.+sin(b*5.)*1.7)+sin(b*8.-a*2.);
+ // 青系
+ vec3 cool=mix(vec3(.002,.01,.05),vec3(.03,.18,.65),smoothstep(-.8,1.5,s));
+ cool=mix(cool,vec3(.05,.70,.95),.6*pow(.5+.5*sin(a*3.5-b*4.),4.));
+ cool=mix(cool,vec3(.75,.06,.70),.5*pow(.5+.5*sin(a*2.4+b*3.2+1.),3.));
+ cool=mix(cool,vec3(.95,.72,.15),.25*pow(.5+.5*sin(a*4.+b*7.),12.));
+ // 金系
+ vec3 warm=mix(vec3(.03,.015,.01),vec3(.85,.48,.12),smoothstep(-.8,1.3,s));
+ warm=mix(warm,vec3(.95,.86,.62),.5*pow(.5+.5*sin(a*4.+b*7.),6.));
+ warm=mix(warm,vec3(.35,.85,.70),.35*pow(.5+.5*sin(a*2.4+b*3.2+1.),8.));
+ warm=mix(warm,vec3(.9,.25,.6),.25*pow(.5+.5*sin(a*3.5-b*4.),10.));
+ // ミトコンドリア：暗い内部に赤橙〜マゼンタの膜光
+ vec3 mito=mix(vec3(.03,.005,.01),vec3(.75,.18,.08),smoothstep(-1.,1.2,s));
+ mito=mix(mito,vec3(.95,.35,.55),.5*pow(.5+.5*sin(a*2.4+b*3.2+1.),4.));
+ mito=mix(mito,vec3(1.,.75,.35),.25*pow(.5+.5*sin(a*4.+b*7.),10.));
+ // モルフォ蝶：群青〜シアンに、補色のオレンジの帯
+ vec3 morpho=mix(vec3(.01,.01,.12),vec3(.05,.25,.95),smoothstep(-.8,1.3,s));
+ morpho=mix(morpho,vec3(.1,.85,1.),.55*pow(.5+.5*sin(a*3.5-b*4.),3.));
+ morpho=mix(morpho,vec3(1.,.45,.08),.35*pow(.5+.5*sin(a*2.+b*5.+2.),9.));
+ // スチームパンク：真鍮と銅、油の黒、緑青
+ vec3 steam=mix(vec3(.02,.012,.008),vec3(.78,.52,.18),smoothstep(-.6,1.3,s));
+ steam=mix(steam,vec3(.85,.42,.22),.45*pow(.5+.5*sin(a*2.4+b*3.2+1.),3.));
+ steam=mix(steam,vec3(.98,.9,.6),.4*pow(.5+.5*sin(a*4.+b*7.),8.));
+ steam=mix(steam,vec3(.15,.5,.42),.3*pow(.5+.5*sin(a*1.7-b*2.5+.7),6.));
+ vec3 col=cool*scene[0]+warm*scene[1]+mito*scene[2]+morpho*scene[3]+steam*scene[4];
+ // 上方の光源帯（細い）と、全体の上下グラデーション
+ col*=.7+.6*smoothstep(-.6,.9,r.y);
+ float strip=exp(-pow((b-.35+.12*sin(a*3.))/.05,2.));
+ col+=strip*vec3(1.,.95,.9)*.45;
+ return col;
+}
+// 下地の顔料：薄膜干渉。高さ（膜厚）で色が回る
+vec3 film(float h,float cosv){
+ float th=h*2.2+ (1.-cosv)*.6;
+ vec3 cool=.5+.5*cos(6.2831853*(th+vec3(.55,.30,.05)));
+ float sat=smoothstep(.2,.8,fract(th*.5+.3));
+ cool=mix(vec3(.01,.02,.08),cool*vec3(.75,.95,1.25),.25+.75*sat);       // 黒〜紺の谷と、シアン/マゼンタの面
+ vec3 warm=.5+.5*cos(6.2831853*(th*.8+vec3(.05,.15,.35)));
+ warm=mix(warm,vec3(.25,.12,.03),.35);
+ // ミトコンドリア：濡れた赤橙の膜、谷は暗赤
+ vec3 mito=mix(vec3(.12,.01,.03),vec3(.95,.35,.2),smoothstep(.2,.8,fract(th*.6)));
+ mito=mix(mito,vec3(.9,.2,.6),.4*smoothstep(.6,1.,fract(th*.35+.2)));
+ // モルフォ蝶：構造色。正面は青、斜めになるほど紫→シアンへ回る
+ float ang=pow(1.-cosv,1.5);
+ vec3 morpho=mix(vec3(.02,.12,.95),vec3(.35,.05,.8),smoothstep(.0,.5,ang));
+ morpho=mix(morpho,vec3(.1,.9,1.),smoothstep(.45,.9,ang));
+ morpho=mix(vec3(.0,.01,.06),morpho,.35+.65*smoothstep(.25,.75,fract(th*.4+.1)));
+ // スチームパンク：真鍮のグラデーション、谷に緑青
+ float br=smoothstep(.1,.9,fract(th*.45));
+ vec3 steam=mix(vec3(.12,.07,.03),vec3(.85,.62,.25),br);
+ steam=mix(steam,vec3(.95,.55,.3),.35*smoothstep(.5,1.,fract(th*.3+.4)));
+ steam=mix(vec3(.08,.32,.28),steam,smoothstep(.0,.35,br));
+ steam=mix(vec3(.03,.02,.012),steam,smoothstep(.0,.45,fract(th*.45+.5)))*.9;   // 油の黒を混ぜて暗く
+ return cool*scene[0]+warm*scene[1]+mito*scene[2]+morpho*scene[3]+steam*scene[4];
+}
+
+// ---- 顔料：本家の主役。輪郭のはっきりした色面と、その中を走る細い等値線（彫刻線）----
+uniform float pigAmt,sparkAmt,sparkT,detailAmt,ledAmt;
+float bin6(float s){return s<.18?0.:s<.40?1.:s<.62?2.:s<.86?3.:s<.92?4.:5.;}
+vec3 pick6(float s,vec3 c0,vec3 c1,vec3 c2,vec3 c3,vec3 c4,vec3 c5){
+ return s<.18?c0:s<.40?c1:s<.62?c2:s<.86?c3:s<.92?c4:c5;
+}
+int gScene=0;float gEdge=.5;                                                    // この画素で使うシーン（移ろいの途中は場所ごとに選ぶ）
+vec3 palette(float s){
+ if(gScene==0)return pick6(s,vec3(.30,.10,.65),vec3(.12,.30,1.),vec3(.25,.75,1.),vec3(.70,.30,.95),vec3(1.,.95,1.),vec3(1.,.75,.30));   // 宵：紫・青・水色に金
+ if(gScene==1)return pick6(s,vec3(.03,.04,.03),vec3(.20,.85,.30),vec3(1.,.78,.25),vec3(.10,.65,.55),vec3(1.,.97,.80),vec3(.95,.45,.10));   // 緑金：暗い地に緑・金・青緑
+ if(gScene==2)return pick6(s,vec3(.85,.05,.12),vec3(1.,.25,.55),vec3(.45,.02,.06),vec3(1.,.30,.15),vec3(1.,.85,.90),vec3(.25,.85,.95));   // 紅：深紅・マゼンタに水色の島
+ if(gScene==3)return pick6(s,vec3(.03,.05,.12),vec3(.10,.40,1.),vec3(.30,.90,1.),vec3(.55,.80,.85),vec3(1.,1.,1.),vec3(.80,.65,.95));   // 螺鈿：紺の地に青・水色・銀
+ if(gScene==4)return pick6(s,vec3(.04,.03,.04),vec3(.55,.12,.05),vec3(.25,.95,.35),vec3(.95,.25,.80),vec3(.25,.85,1.),vec3(1.,.90,.30));   // 虹油：暗い地に油膜の虹
+ // 陽光：赤 26%・橙 18%・黄 18%・ターコイズ 20%・白 9%・緑 9%
+ return s<.30?vec3(.85,.08,.04):s<.50?vec3(1.,.36,.06):s<.75?vec3(1.,.84,.18):s<.87?vec3(.08,.78,.86):s<.97?vec3(1.08,1.02,.86):vec3(.30,.76,.20);
+}
+// 帯ひとつ分の色：帯ごとにパレットから色を選び、中に細い等値線、境目に暗い輪郭と明るい線
+// ボロノイ：x=中心までの距離, y=2番目の距離, zw=中心座標
+vec4 voro(vec2 x){
+ vec2 n=floor(x),f=fract(x);float d1=8.,d2=8.;vec2 cc=vec2(0.);
+ for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j));vec2 o=vec2(hash21(n+g),hash21(n+g+17.3))*.85+.075;vec2 r=g+o-f;float d=dot(r,r);
+  if(d<d1){d2=d1;d1=d;cc=n+g+o;}else if(d<d2){d2=d;}}
+ return vec4(sqrt(d1),sqrt(d2),cc);
+}
+// 陽光の帯の並び：赤・橙・赤・黄・ターコイズ・赤・橙・ターコイズ・白・緑 の順に巡る（どこを切り取っても配分が崩れない）
+vec3 sunSeq(float b){
+ float k=mod(b+floor(hash21(vec2(floor(b/10.),3.))*10.),10.);   // 10本ごとに開始位置をずらし、縞の規則性を崩す
+ // 赤4・橙2・シアン2・黄1・クリーム1（参考の色相の割合に合わせた並び）
+ return k<1.?vec3(.82,.06,.04):k<2.?vec3(1.,.34,.06):k<3.?vec3(.90,.12,.05):k<4.?vec3(.10,.72,.86):k<5.?vec3(1.,.82,.20):
+        k<6.?vec3(.85,.08,.05):k<7.?vec3(1.,.45,.08):k<8.?vec3(.12,.60,.85):k<9.?vec3(.92,.16,.06):vec3(1.10,1.02,.84);
+}
+float shardH(vec2 p){
+ if(cellAmt<.01||lite>.5||depthAmt<.01)return 0.;
+ vec2 q0=warpQ(p);
+ float K=mix(9.,6.5,sceneP[5]);
+ vec2 wq=q0*K+.55*vec2(fbm(q0*K*.3),fbm(q0*K*.3+5.2))-.27;
+ vec4 vc=voro(wq);
+ vec2 cellO=wq-vc.zw;
+ vec2 tilt=(vec2(hash21(vc.zw+3.1),hash21(vc.zw+7.7))-.5)*.9;
+ float eyeK=1.;for(int i=0;i<4;i++){float Le=length(wd(p-cores[i].xy))/cores[i].z;eyeK*=smoothstep(1.2,2.6,Le);}
+ float amp=(1.-liquidAmt)*cellAmt*mix(.45,1.,sceneP[5])*(.1+.9*eyeK)*min(depthAmt,1.5);
+ if(sceneP[5]>.01){float fB=(fbm(q0*.34)+.5*fbm(q0*1.+vec2(3.,7.)))*8.;float eB=min(fract(fB),1.-fract(fB));
+  amp*=mix(1.,mix(.2,1.,smoothstep(.20,.04,eB)),sceneP[5]);}   // 破片の凹凸も境目付近だけ
+ float groove=smoothstep(.0,.14,vc.y-vc.x);                       // 継ぎ目は溝：崖にすると反射で白い網目が出る
+ return amp*((.42*hash21(vc.zw+5.5)+.30*dot(cellO,tilt))*groove-.12*(1.-groove));          // 破片ごとに傾いた板：高さがばらつく
+}
+vec3 bandCol(float u,float salt){
+ float b=floor(u),fr=fract(u);
+ vec3 c=gScene==5?sunSeq(b+salt)*(.62+.6*hash21(vec2(b,salt+3.))):palette(hash21(vec2(b+salt,7.)));   // 陽光：帯ごとの明暗差を大きく
+ if(gScene==3||gScene==4){vec3 rb=.5+.5*cos(6.2831853*(u*.17+fr*.35+salt*.03+vec3(0.,.33,.67)));c=mix(c,rb*(.30+.8*max(c.r,max(c.g,c.b))),gScene==4?.55:.35);}   // 薄膜の虹：帯の中で色が移ろう
+ if(gScene==1||gScene==3||gScene==4)c*=.04+1.1*smoothstep(.15,.6,hash21(vec2(b,salt+11.)));   // 暗い地：帯の3割ほどは闇に沈める
+ else if(gScene!=5)c*=.45+.7*hash21(vec2(b,salt+11.));                                     // 帯ごとの明暗差
+ float hatch=.5+.5*cos(fr*6.2831853*2.);
+ c*=.76+.24*hatch;
+ float dark=gScene==5?smoothstep(.11,.0,fr)+smoothstep(.92,1.,fr):smoothstep(.08,.0,fr)+smoothstep(.94,1.,fr);
+ float lite=smoothstep(.05,.09,fr)*(1.-smoothstep(.09,.13,fr));
+ c=mix(c,vec3(.01,.01,.04),dark*.92);
+ c+=vec3(.9,.92,1.)*lite*.22*(1.-.9*liquidAmt);   // 液体では帯の縁の白線を消す（液面の照りに任せる）
+ return c;
+}
+vec3 pigment(vec2 p,vec2 q){
+ // 1) 色面：粗い区画で色の種類を決め、区画の中は控えめな帯。大きな色の塊が残る
+ float f=fbm(q*.34)+.5*fbm(q*1.+vec2(3.,7.));
+ float z=fbm(q*.3+vec2(11.,5.))*6.;float zb=floor(z),zfr=fract(z);
+ float uB=f*(gScene==5?8.:9.);   // どのシーンも塊を大きくgEdge=min(fract(uB),1.-fract(uB));   // 色の塊の境目までの近さ（0＝境目）
+ vec3 c=bandCol(uB,0.);
+ if(gScene==1||gScene==3||gScene==4){float dk=fbm(q*.55+vec2(7.,3.))+.25*fbm(q*1.7+vec2(2.,9.));c*=mix(.04,1.,smoothstep(.50,.62,dk));c=mix(c,vec3(.01,.01,.03),smoothstep(.016,.0,abs(dk-.50))*.9);}   // 暗い地：大きな闇の淵（螺鈿・虹油・緑金）                         // 陽光は塊を大きく                                        // 区画で帯を切らない（直線の切れ目が汚れに見えるため）
+ // 島：色面の中に浮かぶ、輪郭つきの小さな色の粒
+ float isl=fbm(q*2.3+vec2(5.,2.));
+ float im=smoothstep(.615,.635,isl);
+ vec3 ic=palette(hash21(vec2(floor(isl*9.)+zb*5.,31.)))*(.75+.25*cos(isl*6.2831853*14.));
+ float dA=detailAmt*(gScene==5?.3:.45);                              // 陽光は細かい描き込みを控えめに
+ c=mix(c,ic,im*dA);
+ c=mix(c,vec3(.01,.01,.04),smoothstep(.012,.0,abs(isl-.625))*.85*dA);
+ // 等高線：色面を走る細い線（地形図の等高線のように場の等値線を引く）
+ float cl=.5+.5*cos(f*6.2831853*48.);
+ c*=1.-.14*dA*smoothstep(.8,1.,cl);
+ // 2) 目玉：渦のまわりを同心円の帯で置き換える。輪は歪み、渦と一緒に回る。外縁は輪郭で切る
+ for(int i=0;i<4;i++){
+  vec2 d=wd(p-cores[i].xy);float R=cores[i].z;float L=length(d)/R;
+  if(L<3.2){
+   float th=atan(d.y,d.x);
+   float hd=(mod(float(i),2.)<.5)?1.:-1.;
+   float swirlA=.45+1.5*(1.-smoothstep(.6,1.9,L));                     // 内側ほど強く巻く
+   float ue=(gScene==5?8.:5.6)*pow(L,.8)+swirlA*sin(2.*th-hd*5.*L+spins[i]*.6+float(i))+.25*sin(5.*th-spins[i]*.3)+1.6*(fbm(q*1.6+float(i)*5.)-.5);
+   vec3 ce=bandCol(ue,float(i)*29.+3.);
+   vec3 ceSoft=palette(hash21(vec2(floor(ue)+float(i)*29.+3.,7.)))*(.75+.25*cos(fract(ue)*6.2831853*2.));
+   ce=mix(ce,ceSoft,.55*(1.-smoothstep(.8,1.8,L)));                     // 内側ほど輪郭が溶ける
+   ce*=1.-.2*detailAmt*smoothstep(.8,1.,.5+.5*cos(ue*6.2831853*6.));
+   // 外側の輪：溝ごとに虹色がちらつく（薄膜干渉）
+   float inner=gScene==5?0.:1.-smoothstep(1.0,1.75,L);   // 陽光：暗い内側はなく、輪が穴のすぐ際まで来る
+   ce+=(.5+.5*cos(6.2831853*(ue*3.+vec3(0.,.33,.67))))*.14*(1.-inner)*detailAmt;
+   // 内側：暗い紺紫の中に、明るい破片が渦を巻いて吸い込まれていく
+   float phi=hd*(2.4/(L+.3))+spins[i]*.8;                               // 中心ほど速く回る
+   vec2 sp=mat2(cos(phi),-sin(phi),sin(phi),cos(phi))*(d/R);
+   vec3 inA=gScene==0?vec3(.12,.06,.30):gScene==1?vec3(.02,.05,.03):gScene==2?vec3(.25,.02,.06):gScene==3?vec3(.02,.04,.15):gScene==4?vec3(.03,.03,.05):vec3(.30,.05,.03);
+   vec3 inB=gScene==0?vec3(.40,.20,.65):gScene==1?vec3(.20,.45,.15):gScene==2?vec3(.60,.08,.25):gScene==3?vec3(.15,.35,.60):gScene==4?vec3(.30,.20,.35):vec3(.70,.22,.06);
+   vec3 darkIn=mix(inA,inB,noise2(sp*3.+float(i)*7.));                  // シーンの色で暗く沈む
+   float chipN=noise2(sp*6.+float(i)*13.);
+   vec3 chip=palette(hash21(floor(sp*6.)+float(i)*3.))*1.2;
+   vec3 innerCol=mix(darkIn,chip,smoothstep(.6,.68,chipN)*(.4+.6*detailAmt));
+   innerCol=mix(innerCol,vec3(.01,.01,.04),smoothstep(.015,.0,abs(chipN-.6))*.8);   // 破片の輪郭
+   ce=mix(ce,innerCol,inner);
+   ce*=gScene==5?1.08:mix(.38,1.,smoothstep(.6,1.7,L));   // 円盤に向かって沈む（陽光は明るい輪のまま）
+   if(gScene==5){
+    // 白い細い渦巻きの筋：輪に沿ってらせん状に走り、穴の際と外縁で強い
+    float spiral=L*15.-hd*th*2.+spins[i]*1.2+2.*fbm(q*2.+float(i));
+    float wl=smoothstep(.72,.96,.5+.5*cos(spiral));
+    float wAmt=.75+.7*(exp(-pow((L-.78)/.10,2.))+exp(-pow((L-1.6)/.25,2.)));
+    ce=mix(ce,vec3(1.12,1.08,1.),wl*wAmt*.85*(1.-.45*liquidAmt));   // 液体では照りに役目を渡して控えめに
+    ce=mix(ce,vec3(1.15,1.12,1.05),exp(-pow((L-.72)/.04,2.))*.95);   // 穴の際の白い縁
+    ce=mix(ce,vec3(.08,.78,.88),smoothstep(.75,.95,.5+.5*cos(L*9.-hd*th+spins[i]))*.45*exp(-pow((L-1.3)/.35,2.)));   // 輪の間に差すターコイズ
+   }
+   float edge=(gScene==5?2.05:2.25)+(gScene==5?.35:.6)*(fbm(vec2(cos(th),sin(th))*1.3+float(i)*3.+spins[i]*.05)-.5)*2.;   // 外縁の位置（不規則。角度の継ぎ目が出ないよう円周上で評価）
+   float inside=smoothstep(edge+.03,edge-.03,L);
+   c=mix(c,ce,inside);
+   c=mix(c,vec3(.01,.01,.04),smoothstep(.07,.0,abs(L-edge))*.9);       // 外縁の輪郭
+  }
+ }
+ c*=.92+.16*fbm(q*3.+vec2(1.,9.));                                  // 色面の中のむら（彫りの濃淡）
+ return c;
+}
+// ---- 輝点：白い光点。渦で巻かれた座標に乗るので流れと一緒に巻き込まれる。渦の縁に多い ----
+vec3 sparkles(vec2 p,vec2 q){
+ float near=0.;for(int i=0;i<4;i++){float L=length(wd(p-cores[i].xy))/cores[i].z;near+=exp(-pow((L-1.6)/.7,2.));}
+ vec2 cell=floor(q*4.);vec3 light=vec3(0.);
+ for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){
+  vec2 id=cell+vec2(float(x),float(y));float h=hash21(id);
+  vec2 ctr=(id+vec2(hash21(id+7.),hash21(id+19.)))/4.;
+  float d=length(q-ctr);
+  float blink=.35+.65*pow(.5+.5*sin(sparkT*(1.2+h*2.5)+h*31.),2.);
+  float on=step(.58-.3*clamp(near,0.,1.),h);
+  float sz=.6+.8*hash21(id+3.);
+  light+=vec3(.88,.96,1.)*(exp(-d*d/(.0007*sz))*2.2+exp(-d*d/(.006*sz))*.35)*blink*on;
+ }
+ return light;
+}
+// ---- 3次元の処理：高さの地図（hTex）を使う ----
+float hAt(vec2 p){vec2 fc=p/3.5*min(res.x,res.y)+.5*res-jitter;vec4 t=texture2D(hTex,clamp(fc/res,0.,1.));return (t.r+t.g/255.)*12.-5.;}
+float hSm(vec2 p){vec2 fc=p/3.5*min(res.x,res.y)+.5*res-jitter;vec4 t=texture2D(hTex,clamp(fc/res,0.,1.));return (t.b+t.a/255.)*12.-5.;}   // 視差用：破片の段差を含まない
+const float HTOP=2.6,HBOT=-2.2;                                  // 高さの範囲（視差の計算に使う）
+float zScale(){return .055*depthAmt;}                            // 高さ1あたりの奥行き（画面上の距離）
+// 視差：斜めの視線が凹凸に当たる場所を探す（高い所から段々に下りていく）
+vec2 pomP(vec2 p,vec3 v){
+ vec2 dir=-v.xy/max(v.z,.35)*zScale();
+ float n=lite>.5?6.:12.;
+ vec2 prevQ=p;float prevS=-1.;
+ for(int k=0;k<=12;k++){
+  if(float(k)>n)break;
+  float depth=float(k)/n*(HTOP-HBOT);                            // 視線の、頂上からの深さ
+  vec2 q=p+dir*depth;float surf=HTOP-hSm(q);                      // 表面の、頂上からの深さ
+  float sd=surf-depth;
+  if(sd<=0.){float t=prevS/(prevS-sd+1e-4);return mix(prevQ,q,clamp(t,0.,1.));}
+  prevQ=q;prevS=sd;
+ }
+ return prevQ;
+}
+// 影：光の方向へ光線を伸ばし、凹凸に遮られるか調べる（柔らかい影）
+float shadowAt(vec2 p,float h,vec3 L){
+ float s=1.;float steps=lite>.5?6.:14.;
+ vec2 dir=L.xy/max(L.z,.25)*.20*depthAmt;                       // 影用の縦の縮尺（法線とおおむね揃える）
+ for(int k=1;k<=14;k++){
+  if(float(k)>steps)break;
+  float dh=float(k)*float(k)*.012+.02;                           // 光線が上った高さ（近くは細かく、遠くは粗く）
+  float hq=hAt(p+dir*dh);
+  s=min(s,clamp(1.-(hq-(h+dh))*6./max(dh*4.,.25),0.,1.));
+ }
+ return s;
+}
+// くぼみの暗さ：まわりより低い所ほど暗い
+float aoAt(vec2 p,float h){
+ float a=0.;float r1=.03,r2=.09;
+ for(int k=0;k<6;k++){float an=float(k)*1.0472;vec2 o=vec2(cos(an),sin(an));
+  a+=max(0.,hAt(p+o*r1)-h)*.6+max(0.,hAt(p+o*r2)-h)*.4;}
+ return clamp(1.-a/6.*2.2*depthAmt,.3,1.);
+}
+void main(){
+ vec2 uv=(gl_FragCoord.xy+jitter-.5*res)/min(res.x,res.y);vec2 p=uv*3.5;
+ // 1パス目：高さだけを計算して画像に書き出す（16bitに分けて2チャンネルへ）
+ if(heightPass>.5){float hs=H(p);float hh=hs+shardH(p);float hv=clamp((hh+5.)/12.,0.,1.);float sv=clamp((hs+5.)/12.,0.,1.);
+  gl_FragColor=vec4(floor(hv*255.)/255.,fract(hv*255.),floor(sv*255.)/255.,fract(sv*255.));return;}   // RG=破片込みの高さ、BA=なめらかな高さ
+ // 2パス目：高さの地図を読んで、3次元として光を計算する
+ vec2 sway=.22*depthAmt*vec2(sin(time*.05+.7),cos(time*.037));    // カメラがゆっくり揺れる（視差で奥行きが見える）
+ vec3 v=normalize(vec3(-uv*.15-sway,1.));
+ if(depthAmt>.01)p=pomP(p,v);
+ float e=3.5/min(res.x,res.y);
+ float h0=hAt(p);
+ vec3 n=normalize(vec3((h0-hAt(p+vec2(e,0)))/e,(h0-hAt(p+vec2(0,e)))/e,.9));
+ if(liquidAmt>.01){float E=e*4.;vec3 nc=normalize(vec3((hAt(p-vec2(E,0))-hAt(p+vec2(E,0)))/(2.*E),(hAt(p-vec2(0,E))-hAt(p+vec2(0,E)))/(2.*E),.9));n=normalize(mix(n,nc,.85*liquidAmt));}   // 液面：細かい折り目を均して、つるっとした面の法線に
+ float cosv=clamp(dot(n,v),0.,1.);
+ // 導体のFresnel（Schlick）：F0に色を持つ。金属は反射とハイライトに色が付き、誘電体は白いまま
+ vec3 F0=vec3(.35,.55,.75)*scene[0]+vec3(1.,.76,.33)*scene[1]+vec3(.04)*scene[2]+vec3(.05,.05,.09)*scene[3]+vec3(.60,.60,.66)*scene[4];
+ float metal=.45*scene[0]+1.*scene[1]+0.*scene[2]+.2*scene[3]+.4*scene[4];
+ vec3 Fc=F0+(1.-F0)*pow(1.-cosv,5.);
+ float fresnel=.06+.94*pow(1.-cosv,4.);
+ // 液体金属：反射が主、下地の薄膜が従
+ vec3 r=reflect(-v,n);
+ vec3 refl=env(r);
+ vec3 base=film(h0,cosv);
+ // 稜線の谷を暗く（線が見える）、尾根を明るく
+ base*=.95;
+ float gloss=1.-.55*scene[2]-.3*scene[3]+.35*scene[4];
+ // 瑪瑙の帯ごとの明暗
+ float mineral=1.-.7*scene[2]-.5*scene[3];
+ if(lite<.5)base*=1.+agate(p).y*.6*mineral;
+ // 金属は環境反射がF0で色付き、下地は(1-F)で透ける。誘電体は従来どおり
+ vec3 metalCol=base*(1.-Fc)*.9+refl*Fc*reflectAmt*1.6*gloss;
+ vec3 dielCol=base*(1.-fresnel*.5)*1.1+refl*(.5+.6*fresnel)*reflectAmt*1.3*gloss;
+ vec3 col=mix(dielCol,metalCol,metal);
+ // 顔料層：法線で陰影をつけ、反射を薄く重ねる。pigAmt で反射主体の版と連続的に混ぜる
+ vec2 q0=warpQ(p);
+ {float r=fbm(q0*.55+vec2(17.,3.));r=clamp((r-.25)*2.,0.,1.);   // 0〜1 に広げた閾値場
+  float cum=0.;gScene=5;for(int k=0;k<6;k++){cum+=sceneP[k];if(r<=cum+1e-4){gScene=k;break;}}}
+ vec3 L0=normalize(vec3(.35,.75,.8));
+ // 細胞モザイク：粒は流れの座標 q0 の上にある（流れに沿って伸び、巻き込まれる）
+ float K=gScene==5?6.5:9.;
+ float cA=cellAmt*(gScene==5?1.:.45)*(1.-.55*monoAmt)*(1.-.92*liquidAmt);   // 液体では破片をほぼ消す   // モノクロでは破片の網目を控えめに
+ {float eyeK=1.;for(int i=0;i<4;i++){float Le=length(wd(p-cores[i].xy))/cores[i].z;eyeK*=smoothstep(1.2,2.6,Le);}cA*=(gScene==5?.08:.35)+(gScene==5?.92:.65)*eyeK;}   // 目玉の輪の上では粒を薄く（輪が主役）                            // 陽光は全面モザイク、他のシーンは控えめ
+ // 破片：入力座標を歪めて形を不揃いにし、大小2層を重ねる（上の層は一部の破片だけ存在＝重なり）
+ vec2 wq=q0*K;if(lite<.5)wq+=.55*vec2(fbm(q0*K*.3),fbm(q0*K*.3+5.2))-.27;
+ vec4 vc=voro(wq);
+ vec4 vt=lite>.5?vec4(1.,2.,0.,0.):voro(wq*.62+vec2(3.1,7.3));       // 軽量モードでは上の層を省く
+ float top=lite>.5?0.:step(.58,hash21(vt.zw+9.1));                          // 上に乗る大きめの破片
+ float edgeB=smoothstep(.0,.09,vc.y-vc.x);
+ float edgeT=smoothstep(.0,.07,vt.y-vt.x);
+ vec2 cid=mix(vc.zw,vt.zw+100.,top);                             // この画素が属する破片
+ float edge=mix(edgeB,edgeT,top);
+ // 上の破片の縁のすぐ外側に、薄い影を落とす
+ float shadowT=(1.-top)*step(.58,hash21(vt.zw+9.1))*0.;          // （同じ破片の内側判定なので影は下で別に計算）
+ vec2 qc=mix(vc.zw,vt.zw/.62,top)/K;vec2 pc=p+(qc-q0);
+ vec2 cellO=wq-vc.zw;                                            // 粒の中心からのずれ（粒の単位）
+ vec3 pgPix=pigment(p,q0);
+ float inMass=(1.-smoothstep(.20,.04,gEdge));   // 塊の内側ほど1
+ cA*=mix(1.,.18,inMass);
+ float darkK=1.-smoothstep(.03,.16,dot(pgPix,vec3(.3,.5,.2)));   // 闇の淵（顔料がほぼ黒）
+ cA*=1.-darkK;   // 闇の淵には破片の網目を出さない   // 陽光：破片は塊の境目付近だけ。塊の中は滑らかな面
+ float cw=cA*(gScene==5?.45:1.);
+ vec3 pg=(lite>.5||cw<.01)?pgPix:mix(pgPix,pigment(pc,qc),cw);     // 中心色の2回目の計算は、軽量モードでは省く     // 色は粒の中心で決める＝モザイク（陽光は帯の流れを残すため控えめ）
+ float cj=hash21(cid+1.7);
+ pg*=1.-.18*cA*smoothstep(.55,1.,.5+.5*sin(dot(q0,vec2(3.,.6))*22.+fbm(q0*4.)*6.));   // 粒の中の筆の筋
+ pg*=mix(1.,.78+.44*cj,cA);                                     // 粒ごとの明るさのばらつき
+ pg*=1.-.22*inMass*(1.-.5*monoAmt);                                // 網目が減った分、塊の中を少し沈めて明るさを保つ
+ pg*=1.-.10*inMass*smoothstep(.45,.9,fbm(q0*1.5+vec2(4.,1.)));   // 塊の中の流れのむら
+ float pl=dot(pg,vec3(.3,.5,.2));pg=max(mix(vec3(pl),pg,1.3+.35*cA),0.);   // 顔料の彩度を持ち上げる
+ // 粒ごとのドーム：法線を中心から外向きに傾ける
+ // 破片は平らな面：破片ごとに一つの傾きを持つ（丸い盛り上がりはなし）。上の破片は傾きが大きい
+ vec2 tilt=(vec2(hash21(cid+3.1),hash21(cid+7.7))-.5)*mix(.9,1.3,top);
+ vec3 nC=normalize(vec3(n.xy+tilt*cA,n.z));
+ float diff=mix(.80+.34*max(dot(nC,L0),0.),.48+.85*max(dot(nC,L0),0.),cA);   // 破片ごとに明暗がはっきり分かれる
+ float hv0=max(dot(nC,normalize(L0+v)),0.);
+ // 粒の斜面に薄膜の虹色（参考映像の、粒の中で色が移ろうオパールのような光）
+ float slopeC=length(tilt);
+ vec3 irid=.5+.5*cos(6.2831853*(dot(nC.xy,vec2(.8,.6))*2.2+cj*.7+vec3(0.,.33,.67)));
+ pg=mix(pg,pg*.55+irid*.6,.30*cA*smoothstep(.2,.6,slopeC));
+ float glint=(pow(hv0,140.)*1.6+pow(hv0,30.)*.25)*cA;              // 鋭い芯＋小さなにじみ
+ // 上の破片が下の破片に落とす影：上の破片の外側で、上の層の境界に近いほど暗く
+ float nearTop=(1.-top)*(1.-smoothstep(.0,.16,vt.y-vt.x))*step(.58,hash21(vt.zw+9.1)+hash21(vt.zw+9.1)*0.);
+ if(lite<.5)pg*=1.-.35*cA*(1.-top)*(1.-smoothstep(.0,.22,vt.y-vt.x))*step(.58,hash21(vt.zw+9.1));
+ vec3 pigCol=pg*diff*mix(1.,mix(.40,1.,edge),cA)+vec3(1.,.97,.92)*glint*edge+refl*fresnel*.10*reflectAmt*gloss;
+ col=mix(col,pigCol,pigAmt);
+ // 液体の面：斜面に薄膜の虹、縁に周りの映り込み、広めの照り
+ {float sl=length(n.xy)/max(n.z,.05);
+  vec3 ir=.5+.5*cos(6.2831853*(sl*1.2+dot(n.xy,vec2(.7,.4))*1.5+vec3(0.,.33,.67)));
+  float irK=(gScene==3||gScene==4?.45:.22)*(1.-monoAmt);
+  col+=liquidAmt*(1.-darkK)*(ir*smoothstep(.12,.7,sl)*irK*max(dot(pg,vec3(.3,.5,.2)),.25)+refl*fresnel*.35*(1.-.5*monoAmt));
+  col+=liquidAmt*(1.-.8*darkK)*vec3(1.,.97,.92)*pow(max(dot(n,normalize(L0+v)),0.),48.)*.45*specAmt;}
+ col=mix(col,pg*.8,darkK*.9);                                     // 闇の淵は素直に暗く（金属の映り込みを消す）
+ // 渦＝球面レンズ：内側は屈折した環境（暗い部屋が映る）＋縁のフレネル輪
+ float discM=0.;
+ for(int i=0;i<4;i++){
+  vec2 d=wd(p-cores[i].xy);float R=cores[i].z;float L=length(d)/R;
+  if(L<1.){
+   float z=sqrt(1.-L*L);vec3 sn=normalize(vec3(d/R,z*1.2));
+   vec3 tr=refract(-v,sn,1./1.5);
+   vec3 inside=env(normalize(tr*vec3(2.5,2.5,1.)))*.9;   // 屈折で環境が縮んで映る
+   vec2 q2=d/R;float handedL=(mod(float(i),2.)<.5)?1.:-1.;
+   // 視線：最寄りの渦の方向へ暗部が寄る（眼）。回転成分と合成
+   vec2 gaze=vec2(0.);float best=1e9;
+   for(int j=0;j<4;j++){if(j==i)continue;vec2 dj=wd(cores[j].xy-cores[i].xy);float dl=length(dj);if(dl<best){best=dl;gaze=dj/max(dl,1e-3);}}
+   vec2 darkC=.12*vec2(cos(spins[i]*.7),sin(spins[i]*.7))*handedL+.20*gaze*(1.-.3*pulse);           // 暗部が核のまわりを回り、最寄りの渦を向く
+   float dark=smoothstep(.5,.12,length(q2-darkC));
+   float swirlIn=.5+.5*sin(3.*atan(q2.y,q2.x)-handedL*(spins[i]*1.6+5.*L));  // 内部の回転する筋
+   inside*=.75+.5*swirlIn;
+   inside=mix(inside,vec3(.002,.002,.006),dark);
+   float rimF=.05+.95*pow(1.-clamp(dot(sn,v),0.,1.),3.);
+   vec3 lensCol=inside+env(reflect(-v,sn))*rimF*.9*lensAmt;
+   col=mix(col,lensCol,smoothstep(1.,.93,L)*mix(1.,.22,pigAmt));
+   float dR=gScene==5?.68:.60;float dm=smoothstep(dR+.02,dR-.03,length(q2-darkC*(gScene==5?.15:.5)))*pigAmt;discM=max(discM,dm);
+   col=mix(col,gScene==5?vec3(.11,.075,.065):vec3(.06,.045,.09),dm);
+  }
+ }
+ // 砕波の飛沫：勾配が閾値を超えた場所に白いハイライトを散らす（閾値現象）
+ float slope=length(n.xy)/max(n.z,.05);
+ float awayV=1.;for(int i=0;i<4;i++){float Lb=length(wd(p-cores[i].xy))/cores[i].z;awayV*=smoothstep(1.3,2.0,Lb);}   // 渦の縁は砲波ではない
+ float breaking=smoothstep(2.2,3.4,slope)*nonlin*awayV;
+ col+=(1.-darkK)*vec3(.9,.97,1.)*breaking*(.25+.75*hash21(floor(p*60.)+fract(time*7.)))*.6;
+ // 点光源のハイライト：細かい稜線の上に無数の小さな輝点が乗る
+ vec3 L1=normalize(vec3(.4,.8,.7)),L2=normalize(vec3(-.6,.5,.6)),L3=normalize(vec3(.1,-.3,.9));
+ float s1=pow(max(dot(n,normalize(L1+v)),0.),420.),s2=pow(max(dot(n,normalize(L2+v)),0.),380.),s3=pow(max(dot(n,normalize(L3+v)),0.),600.);
+ float halo=pow(max(dot(n,normalize(L1+v)),0.),60.)*.18+pow(max(dot(n,normalize(L2+v)),0.),60.)*.12;
+ vec3 specTint=mix(vec3(.85,.95,1.)*(scene[0]+scene[3])+vec3(1.,.95,.85)*scene[1]+vec3(1.,.7,.6)*scene[2]+vec3(1.,.85,.6)*scene[4],F0*1.2,metal);
+ col+=(specTint*(s1*3.5+halo*1.5)+mix(vec3(1.,.9,1.),F0,metal)*s2*2.4+mix(vec3(.9,1.,1.),F0,metal)*s3*2.8)*specAmt*gloss*(1.-discM)*(1.-.92*darkK);
+ // 異方性ハイライト（ヘアライン金属）：稜線の方向に伸びる光。Wardモデル
+ vec2 dirA=normalize(vec2(fbm(p*.4+7.)-.5,fbm(p*.4+13.)-.5)+1e-3);
+ vec3 T=normalize(vec3(dirA,0.)-n*dot(n,vec3(dirA,0.)));vec3 B=cross(n,T);
+ vec3 hv=normalize(L1+v);float hT=dot(hv,T),hB=dot(hv,B),hN=max(dot(hv,n),.001);
+ float ward=exp(-2.*((hT*hT)/(.55*.55)+(hB*hB)/(.07*.07))/(1.+hN))/(.55*.07*12.57);
+ col+=F0*ward*.03*metal*specAmt*(1.-discM)*(1.-darkK);
+ if(depthAmt>.01){
+  vec3 Ls=normalize(vec3(.5,.7,.42));
+  float sh=shadowAt(p,h0,Ls);
+  float ao=lite>.5?1.:aoAt(p,h0);
+  col*=mix(1.,(.55+.45*sh)*(.4+.6*ao),min(1.,depthAmt));
+ }
+ col+=sparkles(p,q0)*sparkAmt*(1.-discM)*(1.-.6*darkK);
+ float lum=dot(col,vec3(.3,.5,.2));col=mix(vec3(lum),col,1.+.45*(scene[1]+scene[2]+scene[3])+.05*scene[4]);
+ if(monoAmt>.001){
+  // モノクロ：色を明るさだけにして、明暗を少し強める。銀塩のようにわずかに冷たい黒
+  float ml=dot(col,vec3(.30,.55,.15));ml=ml*ml*(3.-2.*min(ml,1.))*.55+ml*.45;
+  col=mix(col,vec3(ml)*vec3(.97,.99,1.03),monoAmt);
+ }
+ if(pastelAmt>.001){
+  // 薄虹：明るいところは淡い虹色、暗い輪郭は墨の線に
+  float pl=dot(col,vec3(.3,.5,.2));
+  vec3 pc=.72+.28*cos(6.2831853*(pl*.6+1.4*fbm(q0*.8+vec2(5.,5.))+vec3(0.,.33,.67)));   // 淡い虹：色相は大きな流れで移ろう
+  pc=mix(pc,vec3(.03,.03,.05),smoothstep(.17,.06,pl));          // 細かい墨は控えめに
+  // 太い墨の渦：流れの座標に乗った等値線。太さが場所で変わり、ところどころ溜まりになる
+  float iF=fbm(q0*.45+vec2(3.,11.))+.15*fbm(q0*1.6+vec2(8.,2.));
+  float iw=.010+.035*smoothstep(.35,.75,fbm(q0*.8+vec2(1.,5.)));
+  float inkL=smoothstep(iw,iw*.45,abs(iF-.62));
+  float iF2=fbm(q0*.9+vec2(13.,4.));float blot=smoothstep(.745,.76,iF2);   // 墨の溜まり
+  pc=mix(pc,vec3(.02,.02,.04),max(inkL,blot)*.95);
+  col=mix(col,pc,pastelAmt);
+ }
+ col*=1.-.18*dot(uv,uv)/(1.+dot(uv,uv));
+ col*=1.+.18*glowAmt;                                             // 露出：LEDの面が発光している明るさへ
+ col=col/(1.+col*.18);
+ // LEDの粒：撮影されたLED壁の画素格子。画面座標に固定（ジッターを掛けない）
+ vec2 lg=fract(gl_FragCoord.xy/3.)-.5;
+ float ledDot=smoothstep(.55,.15,length(lg));
+ col*=mix(1.,.7+.45*ledDot,ledAmt);
+ col+=(hash21(gl_FragCoord.xy+fract(time))-.5)/255.;
+ gl_FragColor=vec4(clamp(col,0.,1.),1.);
+}
+</script>
+<script id="fluidfrag" type="x-shader/x-fragment">
+precision highp float;
+// 流体の移流：画素ごとに「この場所の素材は、どこから流れてきたか」を持つ地図を、速度場に沿って毎コマ運ぶ（セミラグランジュ法・2次）
+// 速度場＝点渦（ビオ・サバール、正則化）＋背景の渦なし流れ（流れ関数の回転）＋一様な漂い。どれも発散ゼロ＝非圧縮
+uniform sampler2D prev;uniform vec2 fres,drift;uniform float dt,init,relax,wrapW,time,swirlK;uniform vec3 cores[4];
+float h21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h21(i),h21(i+vec2(1,0)),f.x),mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x),f.y);}
+float psi(vec2 p){return vn(p*.55+vec2(time*.013,0.))+.5*vn(p*1.3+vec2(3.,time*.021));}
+vec2 P(vec2 fc){return (fc-.5*fres)/min(fres.x,fres.y)*3.5;}
+vec2 toUV(vec2 p){return (p/3.5*min(fres.x,fres.y)+.5*fres)/fres;}
+vec2 vel(vec2 p){
+ vec2 U=drift;
+ for(int i=0;i<4;i++){float z=cores[i].z;if(z<.01)continue;float hd=(mod(float(i),2.)<.5)?1.:-1.;float G=hd*z*z*11.;
+  for(int m=-1;m<=1;m++){if(m!=0&&wrapW<=0.)continue;vec2 d=p-cores[i].xy-vec2(float(m)*wrapW,0.);U+=G/6.2831853*vec2(-d.y,d.x)/(dot(d,d)+z*z*.8);}}
+ float e=.05;U+=swirlK*vec2(psi(p+vec2(0,e))-psi(p-vec2(0,e)),-(psi(p+vec2(e,0))-psi(p-vec2(e,0))))/(2.*e);
+ return U;
+}
+void main(){
+ vec2 p=P(gl_FragCoord.xy);
+ if(init>.5){gl_FragColor=vec4(p,0.,1.);return;}
+ vec2 x0=p-dt*vel(p-.5*dt*vel(p));
+ if(wrapW>0.)x0.x=x0.x-wrapW*floor((x0.x+.5*wrapW)/wrapW);    // 左右がつながっているときは反対側から
+ vec2 uv=toUV(x0);
+ vec2 m;float extra=0.;
+ if(uv.x<0.||uv.x>1.||uv.y<0.||uv.y>1.)m=x0;                          // 画面の外から入ってくる素材は新しい
+ else{
+  vec2 px=1./fres;
+  vec2 mL=texture2D(prev,uv-vec2(px.x,0.)).xy,mR=texture2D(prev,uv+vec2(px.x,0.)).xy,mD=texture2D(prev,uv-vec2(0.,px.y)).xy,mU=texture2D(prev,uv+vec2(0.,px.y)).xy;
+  m=texture2D(prev,uv).xy;
+  m=mix(m,.25*(mL+mR+mD+mU),.12);                                     // わずかに拡散：画素より細い筋はつくらない
+  float hh=2.*3.5/min(fres.x,fres.y);
+  float st=sqrt(max(dot(mR-mL,mR-mL),dot(mU-mD,mU-mD)))/hh;            // 引き伸ばし率（元の地図に対して）
+  extra=clamp((st-2.2)*.12,0.,.35);                                   // 伸びすぎた所は早めに元へ戻す
+ }
+ m=mix(m,p,min(1.,relax+extra));                                      // ゆっくり元へ戻す（引き伸ばしが無限に続かないように）
+ vec2 dd=m-p;float dl=length(dd);if(dl>1.4)m=p+dd*(1.4/dl);              // 遠すぎる所からは運ばない
+ gl_FragColor=vec4(m,0.,1.);
+}
+</script>
+<script id="rdfrag" type="x-shader/x-fragment">
+precision highp float;
+uniform sampler2D rd;uniform vec2 rdRes;uniform float F,K,seed,time,flowT;
+float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+void main(){
+ vec2 uv=gl_FragCoord.xy/rdRes;vec2 px=1./rdRes;
+ vec4 c=texture2D(rd,uv);
+ vec4 lap=(texture2D(rd,uv+vec2(px.x,0.))+texture2D(rd,uv-vec2(px.x,0.))+texture2D(rd,uv+vec2(0.,px.y))+texture2D(rd,uv-vec2(0.,px.y)))*.2
+         +(texture2D(rd,uv+px)+texture2D(rd,uv-px)+texture2D(rd,uv+vec2(px.x,-px.y))+texture2D(rd,uv-vec2(px.x,-px.y)))*.05-c;
+ float u=c.r,v=c.g;float uvv=u*v*v;
+ // 場所によって F,K をわずかに変える：一枚の中に斑点・迷路・ひだが共存する
+ float fx=F+.006*sin(uv.x*6.283+flowT*.1)*cos(uv.y*6.283*1.3);
+ float kx=K+.004*cos(uv.y*6.283*.7-flowT*.07);
+ u+=1.0*lap.r-uvv+fx*(1.-u);
+ v+=.5*lap.g+uvv-(fx+kx)*v;
+ if(seed>.5){u=1.;v=step(.985,hash21(floor(uv*48.)+vec2(time)))*.9;}
+ gl_FragColor=vec4(clamp(u,0.,1.),clamp(v,0.,1.),0.,1.);
+}
+</script>
+<script id="taafrag" type="x-shader/x-fragment">
+precision highp float;
+uniform sampler2D cur,hist;uniform vec2 res;uniform float alpha;
+void main(){vec2 uv=gl_FragCoord.xy/res;vec3 c=texture2D(cur,uv).rgb;vec3 h=texture2D(hist,uv).rgb;
+ // 近傍クランプ：履歴が現フレームの近傍の範囲から外れたら捨てる（ゴースト防止）
+ vec2 px=1./res;vec3 mn=c,mx=c;
+ for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec3 n=texture2D(cur,uv+vec2(float(x),float(y))*px).rgb;mn=min(mn,n);mx=max(mx,n);}
+ h=clamp(h,mn-.02,mx+.02);
+ gl_FragColor=vec4(mix(h,c,alpha),1.);}
+</script>
+<script id="icefrag" type="x-shader/x-fragment">
+precision highp float;
+// 凍る：画素ごとの「凍っている度合い」。凍った隣から、結晶の伸びやすい所を伝って霜が広がる。解けるときは縁から
+uniform sampler2D prev;uniform vec2 fres;uniform float dt,mode,prog,init;uniform vec3 seeds[4];
+float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int k=0;k<4;k++){s+=a*noise2(p);p=mat2(.8,-.6,.6,.8)*p*2.03+3.7;a*=.5;}return s;}
+// 結晶の伸びやすさ：60°ずつの3方向に走る筋（雪の結晶の枝）＋むら
+float crys(vec2 p){vec2 w=p+.6*vec2(fbm(p*.8),fbm(p*.8+5.));float r=0.,a=.5;vec2 q=w*2.2;
+ for(int k=0;k<4;k++){float n=1.-abs(2.*noise2(q)-1.);r+=a*n*n*n;q=mat2(.5,-.866,.866,.5)*q*2.1+1.7;a*=.5;}   // 尾根が網目状につながる＝霜の葉脈
+ return .65*r/.94+.35*fbm(p*5.);}
+
+vec2 P(vec2 fc){return (fc-.5*fres)/min(fres.x,fres.y)*3.5;}
+void main(){
+ vec2 p=P(gl_FragCoord.xy),uv=gl_FragCoord.xy/fres,px=clamp(dt*90.,1.,6.)/fres;   // 前線の速さを、コマの速さに左右されないように
+ if(init>.5){gl_FragColor=vec4(0.);return;}
+ float i=texture2D(prev,uv).r;
+ float a=texture2D(prev,uv+vec2(px.x,0.)).r,b=texture2D(prev,uv-vec2(px.x,0.)).r,c=texture2D(prev,uv+vec2(0.,px.y)).r,d=texture2D(prev,uv-vec2(0.,px.y)).r;
+ float e=texture2D(prev,uv+px).r,f=texture2D(prev,uv-px).r,g=texture2D(prev,uv+vec2(px.x,-px.y)).r,h=texture2D(prev,uv+vec2(-px.x,px.y)).r;
+ float nbMax=max(max(max(a,b),max(c,d)),.8*max(max(e,f),max(g,h))),nbMin=min(min(a,b),min(c,d));
+ float gr=crys(p);
+ if(mode>0.){
+  for(int k=0;k<4;k++){if(seeds[k].z>.5&&length(p-seeds[k].xy)<.07+.08*prog)i=1.;}           // 核：ここから凍り始める
+  float thr=mix(.46,.0,pow(prog,.8));                                                               // 最初は枝だけ、だんだん隙間も埋まる
+  if(nbMax>.55&&gr>thr)i=min(1.,i+dt*9.);
+  i=max(i,smoothstep(.9,1.,prog)*nbMax);                                                     // 最後は全面
+ }else if(mode<0.){
+  i=min(i,nbMin+.03+.05*(1.-gr));                                                            // 縁から解ける
+  i-=dt*(.10+.30*(1.-gr))*(.4+prog);
+ }
+ gl_FragColor=vec4(clamp(i,0.,1.),0.,0.,1.);
+}
+</script>
+<script id="holdfrag" type="x-shader/x-fragment">
+precision highp float;
+// 凍った所は、その瞬間の色を保つ（凍っていない所は今の色を写す）
+uniform sampler2D src,held,ice;uniform vec2 res;uniform float reset;
+void main(){vec2 uv=gl_FragCoord.xy/res;vec3 c=texture2D(src,uv).rgb;vec3 h=texture2D(held,uv).rgb;float k=texture2D(ice,uv).r;
+ gl_FragColor=vec4(reset>.5?c:mix(c,h,smoothstep(.05,.5,k)),1.);}
+</script>
+<script id="copyfrag" type="x-shader/x-fragment">
+precision highp float;uniform sampler2D src,held,ice;uniform vec2 res;uniform float glow,sharp,iceOn,iceT;
+float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int k=0;k<4;k++){s+=a*noise2(p);p=mat2(.8,-.6,.6,.8)*p*2.03+3.7;a*=.5;}return s;}
+// 結晶の伸びやすさ：60°ずつの3方向に走る筋（雪の結晶の枝）＋むら
+float crys(vec2 p){vec2 w=p+.6*vec2(fbm(p*.8),fbm(p*.8+5.));float r=0.,a=.5;vec2 q=w*2.2;
+ for(int k=0;k<4;k++){float n=1.-abs(2.*noise2(q)-1.);r+=a*n*n*n;q=mat2(.5,-.866,.866,.5)*q*2.1+1.7;a*=.5;}   // 尾根が網目状につながる＝霜の葉脈
+ return .65*r/.94+.35*fbm(p*5.);}
+vec4 voroI(vec2 x){vec2 n=floor(x),f=fract(x);float d1=8.,d2=8.;for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j));vec2 o=vec2(hash21(n+g),hash21(n+g+17.3));vec2 r=g+o-f;float d=dot(r,r);if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}return vec4(sqrt(d1),sqrt(d2),0.,0.);}
+void main(){vec2 uv=gl_FragCoord.xy/res;vec3 c=texture2D(src,uv).rgb;
+ if(sharp>.01){vec2 e=max(1.6,.007*min(res.x,res.y))/res;vec3 a=(texture2D(src,uv+vec2(e.x,0.)).rgb+texture2D(src,uv-vec2(e.x,0.)).rgb+texture2D(src,uv+vec2(0.,e.y)).rgb+texture2D(src,uv-vec2(0.,e.y)).rgb)*.25;c=max(c+(c-a)*.42*sharp,0.);}   // 輪郭を立てる（陽光）
+ if(glow>.01){
+  vec3 b=vec3(0.);float R=.028*min(res.x,res.y);
+  for(int k=0;k<12;k++){float an=float(k)*.5236;float rr=R*(k<6?.45:1.);vec2 o=vec2(cos(an+float(k/6)*.26),sin(an+float(k/6)*.26))*rr/res;
+   vec3 s=texture2D(src,uv+o).rgb;b+=max(s-.55,0.);}
+  c+=b/12.*1.8*glow;                                               // 光の滲み
+  float l=dot(c,vec3(.3,.5,.2));
+  c=mix(vec3(l),c,1.-.16*min(glow,1.));                              // 撮影した映像の彩度に寄せる
+  c=mix(c,vec3(1.),smoothstep(.70,1.2,l)*.8*min(glow,1.));       // 明るい所は色が抜けて白く飛ぶ（カメラの写り）
+ }
+ if(iceOn>.5){
+  // 氷：凍った瞬間の色を、白く霞んだ冷たい氷越しに見る。霜の枝、ひび、閉じ込められた気泡、凍る前線の光
+  float k=texture2D(ice,uv).r;
+  if(k>.002){
+   vec2 p=(gl_FragCoord.xy-.5*res)/min(res.x,res.y)*3.5;
+   vec3 h=texture2D(held,uv).rgb;
+   float l=dot(h,vec3(.3,.5,.2));
+   float lk=smoothstep(.02,.35,l);
+   vec3 ic=mix(h,vec3(l),.45)*vec3(.80,.92,1.08)*.95+vec3(.10,.13,.17)*lk;   // 色が抜け、青白く霞む（暗い所は深い氷の暗さのまま）
+   float g=crys(p);
+   ic=mix(ic,vec3(.90,.95,1.),smoothstep(.62,.92,g)*.55*(.3+.7*lk));     // 霜の枝（白く）
+   ic=mix(ic,vec3(.82,.90,.98),.18*fbm(p*9.)*lk);                          // 表面の細かい霜
+   vec4 vc=voroI(p*2.6+.4*fbm(p*2.));float crack=smoothstep(.035,.0,vc.y-vc.x);
+   ic=mix(ic,vec3(.95,.98,1.),crack*.55);                                   // ひび（光を返す白い線）
+   ic=mix(ic,ic*.75,smoothstep(.06,.0,vc.y-vc.x)*.25);
+   float bub=smoothstep(.93,.97,noise2(p*38.))*smoothstep(.4,.9,noise2(p*3.+5.));
+   ic+=vec3(.9,.95,1.)*bub*.6;                                              // 閉じ込められた気泡
+   float sp=pow(max(0.,sin(dot(p,vec2(.7,.4))*3.-iceT*.6+fbm(p*1.5)*4.)),24.);
+   ic+=vec3(.8,.9,1.)*sp*.25;                                               // 氷の面を走る照り返し
+   float front=smoothstep(.15,.45,k)*smoothstep(.95,.6,k);
+   c=mix(c,min(ic,1.),smoothstep(.05,.5,k));
+   c+=vec3(.75,.88,1.)*front*.6;                                            // 凍る前線の光
+  }
+ }
+ gl_FragColor=vec4(min(c,1.),1.);}
+</script>
+<script>
+(()=>{'use strict';
+const canvas=document.querySelector('#c'),gl=canvas.getContext('webgl',{alpha:false,antialias:false,preserveDrawingBuffer:true});
+const err=s=>{const e=document.querySelector('#error');e.style.display='block';e.textContent=s};if(!gl){err('WebGLを利用できません');return}
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
+let program;try{program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,'attribute vec2 pos;void main(){gl_Position=vec4(pos,0.,1.);}'));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,document.querySelector('#frag').textContent));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));gl.useProgram(program)}catch(e){err('シェーダーエラー:\n'+e.message);return}
+const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);const a=gl.getAttribLocation(program,'pos');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||innerWidth<700;let liteMode=false;   // スマホでも全部入りで始め、重ければ自動調整で軽量モードに落とす
+var fluidInit=true,fdtNow=0;var pillarOn=false;const PILLAR=3.4;var slowSec=0,autoTune=true,autoCap=0;
+const U={};['fluidTex','fluidAmt','liquidAmt','pastelAmt','tidePh[0]','tideA[0]','tideLvl','monoAmt','wrapW','glowAmt','flowK','hTex','heightPass','depthAmt','boilAmt','jitter','rdTex','rdAmt','lite','pigAmt','sparkAmt','sparkT','detailAmt','ledAmt','res','time','reliefAmt','ridgeAmt','reflectAmt','specAmt','lensAmt','cores[0]','vels[0]','spins[0]','lagCores[0]','scene[0]','sceneP[0]','cellAmt','tideT','tideAmt','waveAmt','pulse','peri','nonlin'].forEach(k=>U[k]=gl.getUniformLocation(program,k));
+// ---- 追加プログラム：反応拡散・時間AA・コピー
+function makeProgram(fragId){const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,'attribute vec2 pos;void main(){gl_Position=vec4(pos,0.,1.);}'));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,document.querySelector(fragId).textContent));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p}
+let rdP,taaP,copyP,fluidP,iceP,holdP;try{fluidP=makeProgram('#fluidfrag');iceP=makeProgram('#icefrag');holdP=makeProgram('#holdfrag');rdP=makeProgram('#rdfrag');taaP=makeProgram('#taafrag');copyP=makeProgram('#copyfrag')}catch(e){err('シェーダーエラー:\n'+e.message);return}
+const uni=(p,names)=>Object.fromEntries(names.map(n=>[n,gl.getUniformLocation(p,n)]));
+const rdU=uni(rdP,['rd','rdRes','F','K','seed','time','flowT']),taaU=uni(taaP,['cur','hist','res','alpha']),copyU=uni(copyP,['src','res','glow','sharp','held','ice','iceOn','iceT']),iceU=uni(iceP,['prev','fres','dt','mode','prog','init','seeds[0]']),holdU=uni(holdP,['src','held','ice','res','reset']),fluidU=uni(fluidP,['prev','fres','drift','dt','init','relax','wrapW','time','swirlK','cores[0]']);
+function attribFor(p){const a=gl.getAttribLocation(p,'pos');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0)}
+function makeTarget(w,h,wrap){if(w<1||h<1){w=1;h=1}const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,wrap);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,wrap);const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);return{f,t}}
+// 反応拡散：512x512（2のべき乗なので REPEAT 可）
+const RD=512;const rdPer=Number(new URLSearchParams(location.search).get('rdsteps')||3);const rdT=[makeTarget(RD,RD,gl.REPEAT),makeTarget(RD,RD,gl.REPEAT)];let rdCur=0,rdSeed=true,rdSteps=0;
+// 時間AA：シーン→cur、cur+hist→hist'、hist'→画面
+let sceneT=null,histT=[null,null],histCur=0,histValid=false;
+let heightT=null;
+let hTick=0,hValid=false;
+// 流体の地図：半精度（または単精度）浮動小数のテクスチャを2枚で往復。対応していない端末では流体なし
+const extHF=gl.getExtension('OES_texture_half_float'),extF=gl.getExtension('OES_texture_float');gl.getExtension('EXT_color_buffer_half_float');gl.getExtension('WEBGL_color_buffer_float');
+const linHF=gl.getExtension('OES_texture_half_float_linear'),linF=gl.getExtension('OES_texture_float_linear');
+let fluidT=[null,null],fluidCur=0,fluidOK=false,FW=0,FH=0;
+// 凍る：ice=凍っている度合い（流体と同じ解像度）、held=凍った瞬間の色（画面の解像度）
+let iceT2=[null,null],iceCur=0,iceOK=false,iceInit=true,heldT=[null,null],heldCur=0,heldValid=false;
+let iceMode=0,iceProg=0,iceLevel=0,iceActive=false,iceTime=0;const iceSeeds=new Float32Array(12);let freezeAutoAt=0;
+function makeFloatTarget(w,h){
+ for(const [type,lin] of [[extHF&&extHF.HALF_FLOAT_OES,linHF],[extF&&gl.FLOAT,linF]]){if(!type)continue;
+  const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,type,null);
+  const flt=lin?gl.LINEAR:gl.NEAREST;gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,flt);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,flt);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);
+  const ok=gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE;gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  if(ok)return {t,f};gl.deleteTexture(t);gl.deleteFramebuffer(f);}
+ return null}
+function makeFluid(){const m=Math.min(canvas.width,canvas.height);FW=Math.max(8,Math.round(200*canvas.width/m));FH=Math.max(8,Math.round(200*canvas.height/m));
+ const k=Math.min(1,560/Math.max(FW,FH));FW=Math.round(FW*k);FH=Math.round(FH*k);
+ fluidT=[makeFloatTarget(FW,FH),makeFloatTarget(FW,FH)];fluidOK=!!(fluidT[0]&&fluidT[1]);fluidInit=true;
+ iceT2=[makeFloatTarget(FW,FH),makeFloatTarget(FW,FH)];iceOK=!!(iceT2[0]&&iceT2[1]);iceInit=true;
+ heldT=[makeTarget(canvas.width,canvas.height,gl.CLAMP_TO_EDGE),makeTarget(canvas.width,canvas.height,gl.CLAMP_TO_EDGE)];heldValid=false}
+function makeScreenTargets(){hValid=false;makeFluid();heightT=makeTarget(canvas.width,canvas.height,gl.CLAMP_TO_EDGE);gl.bindTexture(gl.TEXTURE_2D,heightT.t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);sceneT=makeTarget(canvas.width,canvas.height,gl.CLAMP_TO_EDGE);histT=[makeTarget(canvas.width,canvas.height,gl.CLAMP_TO_EDGE),makeTarget(canvas.width,canvas.height,gl.CLAMP_TO_EDGE)];histValid=false;if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE){taaOn=false;const t=document.getElementById('taa');if(t){t.value=0;document.getElementById('o_taa').value='off（非対応）'}}gl.bindFramebuffer(gl.FRAMEBUFFER,null)}
+let taaOn=true;const HALTON=[[.5,.333],[.25,.667],[.75,.111],[.125,.444],[.625,.778],[.375,.222],[.875,.556],[.0625,.889]];let jIdx=0;
+// 渦：点渦系（Biot–Savart）。循環Γを持つ点渦が互いを移流する。同符号は互いの周りを回り、異符号は対で並進する
+const vort=[[.7,.95,.40],[-.85,.05,.30],[.3,-1.05,.36],[-.75,-.35,.20]].map(([x,y,r],i)=>({x,y,r,r0:r,vx:0,vy:0,ph:i*1.7,touch:0,spin:i*2.1,handed:(i%2?-1:1)}));
+let NV=2;                                                    // 動いている渦の数（残りは画面外に退避）
+function park(v){v.x=60+Math.random();v.y=60;v.vx=v.vy=0;v.r=.001;v.lx=v.x;v.ly=v.y;v.lvx=v.lvy=0}
+function unpark(v){v.r=v.r0;v.x=(Math.random()-.5)*1.6;v.y=(Math.random()-.5)*2.4;v.lx=v.x;v.ly=v.y;v.lvx=v.lvy=0}
+function setCount(n){for(let i=0;i<vort.length;i++){if(i<n&&vort[i].r<.01)unpark(vort[i]);if(i>=n)park(vort[i])}NV=n}
+// 対ごとの「くるっと回る」状態
+const pairs={};function pairOf(i,j){const k=i*4+j;return pairs[k]||(pairs[k]={t:0,T:0,dir:1,cool:0})}
+const coreData=new Float32Array(12),velData=new Float32Array(8),spinData=new Float32Array(4),lagData=new Float32Array(8);let vortLast=0;
+// 拍動：周期は毎回ランダム（3〜7秒、ときどき長い「間」）。波形は非対称：収縮が速く（前30%）、弛緩が遅い
+let beatPhase=0,beatPeriod=4,pulseVal=0,periPhase=0;
+function skew(x){return x<.3?x/.3*x/.3*(3-2*x/.3):1-((x-.3)/.7)*((x-.3)/.7)*(3-2*(x-.3)/.7)}
+function stepBeatRandom(dt){beatPhase+=dt/(beatPeriod*params.beatint);if(beatPhase>=1){beatPhase-=1;beatPeriod=Math.random()<.2?8+Math.random()*4:3+Math.random()*4;}const amp=beatPeriod>7?.45:1;return skew(beatPhase)*amp}
+// 1. 興奮系：FitzHugh–Nagumo。v=膜電位（拍動）、w=回復変数（不応期）。入力 I は渦の接触と潮位勾配。
+//    I が閾値を超えると一発だけ大きく脈打ち、しばらく不応、静かなら沈黙する。弱い自発発火も残す
+let fhnV=-1.2,fhnW=-.6,excite=0;
+function stepFHN(dt,I){
+ dt=dt/params.beatint;
+ const eps=.08,a=.7,b=.8;const n=Math.max(4,Math.ceil(dt/.01));
+ for(let k=0;k<n;k++){const h=dt/n;
+  const dv=fhnV-fhnV*fhnV*fhnV/3-fhnW+I;const dw=eps*(fhnV+a-b*fhnW);
+  fhnV+=dv*h*2.2;fhnW+=dw*h*2.2;}
+ return Math.max(0,Math.min(1,(fhnV+1.2)/2.6));           // 0〜1 に正規化
+}
+function stepBeat(dt){
+ const rnd=stepBeatRandom(dt);
+ // 入力：渦の接触（touch の和）＋潮位勾配の大きさ＋微弱な自発
+ let touchSum=0,gradSum=0;vort.forEach(v=>{touchSum+=v.touch;const g=tideGrad(v.x,v.y);gradSum+=Math.hypot(g[0],g[1])});
+ excite+=(Math.min(1.2,touchSum*.9+gradSum*.25)-excite)*Math.min(1,dt*3/params.beatint);
+ const I=.25+excite*.75;                                    // 0.25 は自発発火の手前、接触で閾値を越える
+ const fhn=stepFHN(dt,I);
+ pulseVal=(rnd*(1-params.nonlin)+fhn*params.nonlin)*params.beat;
+ periPhase+=dt*1.1*(.5+pulseVal)*Math.min(1,params.beat*3);   // 拍動0なら蠕動も止める
+}
+// JS側の分潮（シェーダーと同じ式）。渦はその勾配に引かれる
+// ---- 潮：架空（従来）／東京湾の実際の潮（気象庁 東京 TK の調和定数 M2・S2・K1・O1） ----
+// 遅角は東京の子午線（東経139°46'）基準。気象庁の潮位表と比べ、時刻は±40分・高さは±25cm程度の精度
+const TK=[[47.73,153.73,2],[23.64,181.77,2],[25.07,178.91,1],[19.57,160.28,1]];const TK_LON=139+46/60,TK_MSL=120;
+let tideMode=0,tidePhA=new Float32Array(4),tideAA=new Float32Array([1,.46,.58,.41]),tideLvlV=0,tideRun0=0,tideRunMs=0;
+function tokyoTide(ms){
+ const D=Math.PI/180,T=(ms-946728000000)/86400000/36525;                 // J2000 からの世紀
+ const s=218.3164+481267.8812*T,h=280.4661+36000.7698*T,N=(125.0445-1934.1363*T)*D;
+ const ut=((ms/3600000)%24+24)%24,T0=15*ut+180;
+ const V=[2*T0-2*s+2*h,2*T0,T0+h-90,T0-2*s+h+90];
+ const f=[1-.037*Math.cos(N),1,1.006+.115*Math.cos(N),1.009+.187*Math.cos(N)],u=[-2.1*Math.sin(N),0,-8.9*Math.sin(N),10.8*Math.sin(N)];
+ const ph=[],amp=[];let eta=0;
+ for(let k=0;k<4;k++){const g=(V[k]+u[k]+TK[k][2]*TK_LON-TK[k][1])*D;ph.push(g);amp.push(f[k]*TK[k][0]);eta+=f[k]*TK[k][0]*Math.cos(g)}
+ return {ph,amp,eta};
+}
+function tideTimeMs(){return tideMode===1?Date.now():tideRun0+tideRunMs}
+function updateTide(){
+ if(tideMode===0){const TAU=Math.PI*2,d=tideDays;tidePhA.set([TAU*d/(12.42/24),TAU*d/(12/24)+1.1,TAU*d/(23.93/24)+2.3,TAU*d/(25.82/24)+.6]);tideAA.set([1,.46,.58,.41])}
+ else{const r=tokyoTide(tideTimeMs());tidePhA.set(r.ph);tideAA.set(r.amp.map(a=>a/47.73))}
+ let e=0,sa=0;for(let k=0;k<4;k++){e+=tideAA[k]*Math.cos(tidePhA[k]);sa+=tideAA[k]}tideLvlV=e/sa;
+}
+function tideReadout(){
+ if(tideMode===0)return '';
+ const ms=tideTimeMs(),r=tokyoTide(ms),r2=tokyoTide(ms+600000),up=r2.eta>r.eta;
+ // 次の満潮・干潮：2分刻みで探す
+ let prev=r.eta,dir=up?1:-1,nx='';for(let m=2;m<=14*60;m+=2){const e=tokyoTide(ms+m*60000).eta;if((dir>0&&e<prev)||(dir<0&&e>prev)){nx=(dir>0?'次の満潮 ':'次の干潮 ')+fmtJST(ms+(m-2)*60000)+'（'+Math.round(prev+TK_MSL)+'cm）';break}prev=e}
+ return '東京湾 '+(tideMode===2?'早回し ':'いま ')+fmtJST(ms,true)+' 潮位 '+Math.round(r.eta+TK_MSL)+'cm '+(up?'↑上げ潮':'↓下げ潮')+' · '+nx;
+}
+function fmtJST(ms,withDate){const d=new Date(ms+9*3600000);const p=x=>String(x).padStart(2,'0');return (withDate?(d.getUTCMonth()+1)+'/'+d.getUTCDate()+' ':'')+p(d.getUTCHours())+':'+p(d.getUTCMinutes())}
+function setTideMode(m){tideMode=m;if(m===2){const now=Date.now(),j=new Date(now+9*3600000);tideRun0=Date.UTC(j.getUTCFullYear(),j.getUTCMonth(),j.getUTCDate())-9*3600000;tideRunMs=0}
+ document.getElementById('tideHud').textContent=tideReadout();}
+function tideJS(x,y,d=tideDays){const TAU=Math.PI*2;
+ if(tideMode>0){const a=tideAA,p=tidePhA;return (a[0]*Math.cos(p[0]+x*.55+y*.30)+a[1]*Math.cos(p[1]-x*.40+y*.45)+a[2]*Math.cos(p[2]+x*.20-y*.60)+a[3]*Math.cos(p[3]-x*.62-y*.18))/2.45}
+ return (Math.cos(TAU*d/(12.42/24)+x*.55+y*.30)+.46*Math.cos(TAU*d/(12.00/24)-x*.40+y*.45+1.1)+.58*Math.cos(TAU*d/(23.93/24)+x*.20-y*.60+2.3)+.41*Math.cos(TAU*d/(25.82/24)-x*.62-y*.18+.6))/2.45}
+function tideGrad(x,y,d=tideDays){const e=.05;return [(tideJS(x+e,y,d)-tideJS(x-e,y,d))/(2*e)*params.tideamt,(tideJS(x,y+e,d)-tideJS(x,y-e,d))/(2*e)*params.tideamt]}
+const GAMMA=11.0;   // 循環の尺度。Γ_i = handed·r_i²·GAMMA
+window.__vort=vort;window.__cores=(t)=>cores(t);window.__coreData=()=>Array.from(coreData).map(x=>x.toFixed(2)).join(',');window.__lag=()=>Array.from(lagData).map(x=>x.toFixed(2)).join(',');
+// 渦の計算は一定の刻み（0.025）で進める：コマの時間に左右されないので、同じ種なら同じ展開になる
+let simT=0,simAcc=0,pTide=0,physRnd=Math.random;const SIMH=.025;
+function cores(t){
+ let total=Math.min(Math.max(t-vortLast,0),.5);vortLast=t;simAcc+=total;let nSub=0;while(simAcc>=SIMH&&nSub<40){simAcc-=SIMH;nSub++}const dt=SIMH;
+ const outer=v=>v.r*1.75;
+ const act=vort.slice(0,NV);const wrapOn=params.wrap>.5;
+ const bx=canvas.width/Math.min(canvas.width,canvas.height)*1.75,by=canvas.height/Math.min(canvas.width,canvas.height)*1.75;const WW=2*bx;const md=x=>wrapOn?x-WW*Math.round(x/WW):x;
+ for(let k=0;k<nSub;k++){const h=dt;simT+=h;pTide+=h*params.tide/(40*Math.max(params.vmove,.01));const t=simT;
+  act.forEach(v=>{v.px=v.x;v.py=v.y});
+  act.forEach((v,i)=>{
+   // 他の渦が誘導する速度（正則化した点渦）
+   let ux=0,uy=0;
+   act.forEach((o,j)=>{if(i===j)return;const Pq=pairOf(Math.min(i,j),Math.max(i,j));const wq=1-.85*(Pq.part>0?Math.sin(Math.PI*Pq.part/3.5):0);for(let m=-1;m<=1;m++){if(m&&!wrapOn)continue;const dx=v.x-o.x-m*WW,dy=v.y-o.y,G=o.handed*o.r*o.r*GAMMA*(1+params.nonlin*.6*Math.tanh(tideJS(o.x,o.y,pTide)*1.5)),dl=(v.r+o.r)*.9;const inv=G/(2*Math.PI)/(dx*dx+dy*dy+dl*dl);ux+=-dy*inv*wq;uy+=dx*inv*wq;}});
+   const g=tideGrad(v.x,v.y,pTide);
+   const kx=.8,ky=.8,A=.45,ph1=.13*t,ph2=-.09*t;
+   const bgx=A*ky*Math.sin(kx*v.x+ph1)*Math.cos(ky*v.y+ph2),bgy=-A*kx*Math.cos(kx*v.x+ph1)*Math.sin(ky*v.y+ph2);
+   // 大きな流れ：向きがゆっくり変わる一様な漂い。渦はこれに乗って画面を横切り、外へ出ていく
+   const dth=t*.031+1.3*Math.sin(t*.011);const drift=.10;
+   v.ux=ux+bgx+g[0]*.08+drift*Math.cos(dth);
+   v.uy=uy+bgy+g[1]*.08+drift*Math.sin(dth);
+   // 入ってきたばかりの渦は、しばらく画面の内側へ向かう
+   if(v.enter>0){v.enter-=h;const k2=Math.min(1,v.enter);let tx=0,ty=0;const o=act.find(w=>w!==v);if(o){tx=o.x;ty=o.y}
+    let ex=md(tx-v.x)*.16,ey=(ty-v.y)*.16;const el=Math.hypot(ex,ey);if(el>.22){ex*=.22/el;ey*=.22/el}   // 引き込みは弱く（直線の突進にしない）
+    v.ux+=ex*k2;v.uy+=ey*k2;}
+   v.touch*=Math.exp(-h*2.);
+  });
+  // 接触：外円が触れた瞬間に「くるっと」回り始める。角速度は 0→加速→ピーク→減速→0（sin 形）
+  for(let i=0;i<act.length;i++)for(let j=i+1;j<act.length;j++){
+   const a=act[i],b=act[j],P=pairOf(i,j);
+   const dx=md(b.x-a.x),dy=b.y-a.y,d=Math.max(Math.hypot(dx,dy),1e-4),nx=dx/d,ny=dy/d;
+   const contact=outer(a)+outer(b),gap=d-contact;
+   P.cool=Math.max(0,P.cool-h);
+   if(gap<0){const f=-gap*5.0;a.ux-=f*nx;a.uy-=f*ny;b.ux+=f*nx;b.uy+=f*ny;}
+   else if(P.T===0&&!(P.part>0)&&P.cool<3){const f=.14*Math.exp(-Math.pow((gap-.5)/.9,2));a.ux+=f*nx;a.uy+=f*ny;b.ux-=f*nx;b.uy-=f*ny;}   // 引き合う
+   if(P.T===0&&P.cool===0&&gap<.05){
+    // 回る向き：接触時の相対速度の接線成分。ほぼゼロなら2つの渦の巻きの向きの和
+    const vt=-(b.vx-a.vx)*ny+(b.vy-a.vy)*nx;
+    P.dir=Math.abs(vt)>.03?Math.sign(vt):((a.handed+b.handed)>=0?1:-1);
+    P.T=1;P.t=0;P.sw=0;P.last=Math.atan2(dy,dx);a.touch=1;b.touch=1;
+   }
+   if(P.part>0){
+    // 別れ：つないでいた線の向きに、互いに反対方向へ。ゆっくり加速して、ゆっくり流れに戻る
+    P.part=Math.max(0,P.part-h);const pr=1-P.part/3.5;const sp=.38*Math.sin(Math.PI*pr);
+    a.ux-=nx*sp;a.uy-=ny*sp;b.ux+=nx*sp;b.uy+=ny*sp;
+   }
+   if(P.T>0){
+    // 進行度＝実際に回った角度／180°。加速して、半周に近づくと減速する
+    const ang=Math.atan2(dy,dx);let da=ang-P.last;da=Math.atan2(Math.sin(da),Math.cos(da));P.last=ang;P.sw+=da*P.dir;P.t+=h;
+    const tau=Math.max(0,P.sw)/Math.PI;
+    const W=1.7*params.orbit;
+    const w=W*(.18+.82*Math.sin(Math.PI*Math.min(tau,1)));
+    // 中点のまわりの回転：それぞれ半径 d/2 の円周の接線方向へ
+    const tx=-ny*P.dir,ty=nx*P.dir,sp=w*d*.5;
+    a.ux-=tx*sp;a.uy-=ty*sp;b.ux+=tx*sp;b.uy+=ty*sp;
+    // 回っている間は距離を接触距離に保つ（向心）
+    const keep=(d-contact*.98)*2.5;a.ux+=nx*keep;a.uy+=ny*keep;b.ux-=nx*keep;b.uy-=ny*keep;
+    if(d>contact*1.6){P.T=0;P.cool=3;}                                  // 離れてしまったら回転をやめる（突進しない）
+    else if(tau>=1||P.t>6||params.orbit===0){P.T=0;P.cool=7.0;if(params.orbit>0){P.part=3.5;}}   // 半周で手を離し、互いに反対方向へ別れる          // 半周で手を離し、あとは流れに任せる
+   }
+  }
+  act.forEach(v=>{
+   const k=1-Math.exp(-h*3.);v.vx+=(v.ux-v.vx)*k;v.vy+=(v.uy-v.vy)*k;
+   const sp=Math.hypot(v.vx,v.vy);if(sp>1.3){v.vx*=1.3/sp;v.vy*=1.3/sp}
+   v.x+=v.vx*h;v.y+=v.vy*h;
+   v.spin+=v.handed*.6*h;
+   // 画面から完全に出たら、縁のどこかから入り直す
+   const ox=bx+outer(v)+.25,oy=by+outer(v)+.25;
+   if(wrapOn){if(v.x>bx){v.x-=WW;v.lx-=WW;v.px-=WW}else if(v.x<-bx){v.x+=WW;v.lx+=WW;v.px+=WW}}   // 左右はつながる：右から出たら同じ高さで左から
+   if((!wrapOn&&Math.abs(v.x)>ox)||Math.abs(v.y)>oy){
+    const side=wrapOn?2+Math.floor(physRnd()*2):Math.floor(physRnd()*4),u=(physRnd()*2-1)*.8;
+    const ix=bx+outer(v)*.9,iy=by+outer(v)*.9;
+    if(side===0){v.x=-ix;v.y=u*by}else if(side===1){v.x=ix;v.y=u*by}else if(side===2){v.x=u*bx;v.y=-iy}else{v.x=u*bx;v.y=iy}
+    v.vx=-v.x*.15;v.vy=-v.y*.15;v.enter=3;v.lx=v.x;v.ly=v.y;v.lvx=v.lvy=0;
+    v.r=v.r0*(.85+.3*physRnd());v.px=v.x;v.py=v.y;
+    {const iv=act.indexOf(v);for(let j=0;j<act.length;j++)if(j!==iv){const Pr=pairOf(Math.min(iv,j),Math.max(iv,j));Pr.T=0;Pr.part=0;Pr.cool=3;}}   // 入り直した渦は、前の回転や別れを持ち越さない
+   }});
+ }
+ vort.forEach((v,i)=>{
+  if(v.lx===undefined){v.lx=v.x;v.ly=v.y;v.lvx=0;v.lvy=0}
+  if(i<NV){const om=1.6,ze=.55;for(let q=0;q<nSub;q++){v.lvx+=((v.x-v.lx)*om*om-2*ze*om*v.lvx)*dt;v.lvy+=((v.y-v.ly)*om*om-2*ze*om*v.lvy)*dt;v.lx+=v.lvx*dt;v.ly+=v.lvy*dt;}}
+  const bk=Math.min(1,params.beat*3);const breathe=1.+(.05*Math.sin(t*.35+v.ph)+.08*v.touch)*bk+.05*pulseVal;
+  const al=simAcc/SIMH,ix=v.px===undefined?v.x:v.px+(v.x-v.px)*al,iy=v.py===undefined?v.y:v.py+(v.y-v.py)*al;   // 刻みの間は補間して滑らかに見せる
+  coreData.set([ix,iy,v.r*breathe],i*3);velData.set([v.vx,v.vy],i*2);spinData[i]=v.spin;lagData.set([v.lx,v.ly],i*2)});
+ return coreData;
+}
+park(vort[2]);park(vort[3]);window.__pairs=pairs;
+const params={speed:1,relief:1,ridge:1,reflect:1,spec:1,lens:1,vmove:2,tide:1,tideamt:1,waveamt:.6,nonlin:1,rdamt:1,beat:0,beatint:4,pig:.9,spark:.6,detail:1,led:.15,cell:1,depth:1,boil:2,flow:5,glow:1,orbit:1,wrap:0,liquid:1,fluid:1,freezeauto:0};
+document.getElementById('vcount').oninput=e=>{const n=Number(e.target.value);document.getElementById('o_vcount').value=n;setCount(n)};
+document.getElementById('resSel').onchange=e=>{autoTune=false;resChoice=e.target.value;resize()};
+document.getElementById('lite').oninput=e=>{autoTune=false;liteMode=e.target.value==='1';document.getElementById('o_lite').value=liteMode?'on':'off'};
+document.getElementById('taa').oninput=e=>{taaOn=e.target.value==='1';document.getElementById('o_taa').value=taaOn?'on':'off';histValid=false};
+Object.keys(params).forEach(k=>{document.getElementById(k).oninput=e=>{const v=Number(e.target.value)/100;params[k]=v;document.getElementById('o_'+k).value=v.toFixed(1)+'×';if(k==='wrap')document.getElementById('o_wrap').value=v>.5?'on':'off';if(k==='freezeauto')document.getElementById('o_freezeauto').value=v>.5?'on':'off';if(k==='tide')document.getElementById('o_dayLen').textContent=v>0?Math.round(40/v):'∞'}});
+if(innerWidth<600)document.querySelector('.tuning').removeAttribute('open');
+{const l=document.getElementById('lite');if(l){l.value=liteMode?1:0;document.getElementById('o_lite').value=liteMode?'on':'off'}}
+// 内部名とボタン：blue=宵 gold=緑金 mito=紅 morpho=螺鈿 steam=虹油 sun=陽光 mono=モノクロ pastel=薄虹（6番は空き：以前の夜光）
+const SCENES=['blue','gold','mito','morpho','steam','sun','night','mono','pastel'];let pastelW=0,pastelTarget=0,monoW=0,monoTarget=0,sceneSel=5,sceneTarget=5,paused=false,cycling=false,cycleHold=20,cycleAt=0;const sceneW=new Float32Array([0,0,0,0,0,1]);const scene5=new Float32Array(5);window.__sceneW=sceneW;window.__setTarget=i=>{sceneTarget=i};
+const SCENE_ORDER=[5,2,0,3,4,1,8,7];const nextScene=i=>{const k=SCENE_ORDER.indexOf(i);return SCENE_ORDER[(k+1)%SCENE_ORDER.length]};   // 陽光→紅→宵→螺鈿→虹油→緑金→薄虹→モノクロ   // 夜光は外した（シェーダーには残してある）
+function setScene(i){sceneSel=i;sceneTarget=i>=6?5:i;monoTarget=i===7?1:0;pastelTarget=i===8?1:0;SCENES.forEach((k,j)=>document.getElementById(k)&&document.getElementById(k).classList.toggle('active',j===i&&!cycling));document.getElementById('cycle').classList.toggle('active',cycling)}
+SCENES.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.onclick=()=>{cycling=false;setScene(i)}});
+document.getElementById('hold').oninput=e=>{cycleHold=Number(e.target.value);document.getElementById('o_hold').value=cycleHold+'秒'};
+document.getElementById('cycle').onclick=()=>{cycling=!cycling;cycleAt=performance.now();setScene(cycling?nextScene(sceneSel):sceneSel)};
+{const q=new URLSearchParams(location.search).get('scene');const i=SCENES.indexOf(q);if(i>=0){setScene(i);sceneW.fill(0);sceneW[sceneTarget]=1;monoW=monoTarget;pastelW=pastelTarget}else if(q==='cycle'){cycling=true;cycleAt=performance.now();setScene(0)}}
+const pauseBtn=document.getElementById('pause');pauseBtn.onclick=()=>{paused=!paused;pauseBtn.textContent=paused?'▶ 再生':'Ⅱ 停止'};
+document.getElementById('pillar').onclick=()=>{pillarOn=!pillarOn;document.body.classList.toggle('pillar',pillarOn);document.getElementById('pillar').classList.toggle('active',pillarOn);resize()};
+{const q=new URLSearchParams(location.search);if(q.get('pillar')==='1'){pillarOn=true;document.body.classList.add('pillar');setTimeout(()=>{document.getElementById('pillar').classList.add('active');resize()},0)}}
+document.getElementById('immersive').onclick=()=>{const h=document.body.classList.toggle('hide');document.getElementById('immersive').textContent=h?'操作 ↙':'没入 ↗'};
+let resChoice='auto';
+// 柱モード：参考映像の柱の比率（幅1：高さ3.4）で、画面に収まる最大の大きさに。まわりは黒
+function viewSize(){if(!pillarOn)return[innerWidth,innerHeight];let h=innerHeight*.94,w=h/PILLAR;if(w>innerWidth*.94){w=innerWidth*.94;h=w*PILLAR}
+ document.body.style.setProperty('--pw',w+'px');document.body.style.setProperty('--ph',h+'px');return[w,h]}
+function resize(maxEdge){if(recordStarting||(recorder&&recorder.state!=='inactive'))return;const [vw,vh]=viewSize();const cap=resChoice==='auto'?(autoCap||(isMobile?1080:1440)):Number(resChoice);const s=Math.min(devicePixelRatio||1,isMobile?1.5:3,cap/Math.max(vw,vh));canvas.width=Math.round(vw*s);canvas.height=Math.round(vh*s);gl.viewport(0,0,canvas.width,canvas.height);makeScreenTargets()}addEventListener('resize',resize);
+let recorder=null,recordStream=null,recordTimer=null,recordStarting=false,recordStart=0,recordChunks=[],recordUrl=null,recordFile=null;
+
+resize();
+const recordButton=document.querySelector('#record'),recordStatus=document.querySelector('#recordStatus'),recordBar=document.querySelector('#recordbar'),result=document.querySelector('#recordResult'),preview=document.querySelector('#recordPreview'),download=document.querySelector('#downloadVideo'),share=document.querySelector('#shareVideo'),durationSelect=document.querySelector('#recordDuration');
+let recBox=null,recordingCanvas=null,recordingContext=null,recordTrack=null,manualFrames=false,captureAt=-Infinity,activeMs=0,activeSince=null,recordLimit=30,recordWakeLock=null,savingRecording=false;
+let noticeTimer=null;function notify(message){const n=document.querySelector('#notice');n.textContent=message;clearTimeout(noticeTimer);if(message)noticeTimer=setTimeout(()=>{n.textContent=''},5000)}
+function elapsedRecording(){return activeMs+(activeSince===null?0:Math.max(0,performance.now()-activeSince))}
+function freezeRecordingClock(){if(activeSince!==null){activeMs+=Math.max(0,performance.now()-activeSince);activeSince=null}}
+async function holdScreen(){try{if(navigator.wakeLock&&!document.hidden){const lock=await navigator.wakeLock.request('screen');if(recorder&&recorder.state==='recording')recordWakeLock=lock;else await lock.release()}}catch(e){}}
+function stopTracks(){if(recordStream){recordStream.getTracks().forEach(t=>t.stop());recordStream=null}recordTrack=null;recordingCanvas=null;recordingContext=null;if(recordWakeLock){recordWakeLock.release().catch(()=>{});recordWakeLock=null}}
+function resetRecordingUI(){clearInterval(recordTimer);recordTimer=null;recordStarting=false;recordButton.disabled=false;durationSelect.disabled=false;document.querySelector('#recordQuality').disabled=false;recordButton.textContent='● 録画';recordStatus.textContent='';recordBar.classList.remove('running');resize()}
+function stopRecording(reason=''){
+ if(recorder&&recorder.state!=='inactive'&&!savingRecording){freezeRecordingClock();savingRecording=true;clearInterval(recordTimer);recordButton.disabled=true;recordStatus.textContent='保存準備中';if(reason)notify(reason);recorder.stop()}
+}
+function clearOldVideo(){preview.pause();preview.removeAttribute('src');preview.load();if(recordUrl)URL.revokeObjectURL(recordUrl);recordUrl=null;recordFile=null;}
+// Complete the duration metadata in streaming WebM files. Existing duration
+// is replaced in place; absent duration is appended only to a simple stream.
+async function finalizeWebmDuration(blob,ms){
+ try{
+  const bytes=new Uint8Array(await blob.arrayBuffer());
+  function element(pos){
+   const start=pos;let n=1,flag=128;while(n<=4&&!(bytes[pos]&flag)){n++;flag>>=1}if(n>4)throw Error('EBML ID');
+   let id=0;for(let k=0;k<n;k++)id=id*256+bytes[pos++];
+   const sizeStart=pos;let sizeN=1,mask=128;while(sizeN<=8&&!(bytes[pos]&mask)){sizeN++;mask>>=1}if(sizeN>8)throw Error('EBML size');
+   let size=bytes[pos++]&(mask-1),unknown=size===(mask-1);
+   for(let k=1;k<sizeN;k++){unknown=unknown&&bytes[pos]===255;size=size*256+bytes[pos++]}
+   const end=unknown?bytes.length:pos+size;if(end>bytes.length)throw Error('EBML bounds');return{start,id,sizeStart,data:pos,end,size,unknown};
+  }
+  let segment=null;for(let pos=0;pos<bytes.length;){const e=element(pos);if(e.id===0x18538067){segment=e;break}pos=e.end}if(!segment)return blob;
+  let info=null,hasSeek=false;for(let pos=segment.data;pos<segment.end;){const e=element(pos);if(e.id===0x114d9b74)hasSeek=true;if(e.id===0x1549a966)info=e;if(e.id===0x1f43b675)break;pos=e.end}if(!info)return blob;
+  let scale=1000000,duration=null;for(let pos=info.data;pos<info.end;){const e=element(pos);if(e.id===0x2ad7b1){scale=0;for(let k=e.data;k<e.end;k++)scale=scale*256+bytes[k]}if(e.id===0x4489)duration=e;pos=e.end}
+  const ticks=ms*1000000/scale;
+  if(duration&&(duration.size===4||duration.size===8)){const dv=new DataView(bytes.buffer);if(duration.size===8)dv.setFloat64(duration.data,ticks);else dv.setFloat32(duration.data,ticks);return new Blob([bytes],{type:blob.type})}
+  if(hasSeek||!segment.unknown)return blob;
+  const tag=new Uint8Array(11);tag.set([0x44,0x89,0x88]);new DataView(tag.buffer).setFloat64(3,ticks);
+  const length=info.end-info.data+tag.length;let n=1;while(length>=Math.pow(2,7*n)-1)n++;const size=new Uint8Array(n);let left=length;for(let k=n-1;k>=0;k--){size[k]=left%256;left=Math.floor(left/256)}size[0]|=1<<(8-n);
+  return new Blob([bytes.subarray(0,info.sizeStart),size,bytes.subarray(info.data,info.end),tag,bytes.subarray(info.end)],{type:blob.type});
+ }catch(e){return blob}
+}
+function captureRecordingFrame(now){
+ if(!recorder||recorder.state!=='recording'||!recordingContext||now-captureAt<1000/30-1)return;
+ if(recBox){recordingContext.fillStyle='#000';recordingContext.fillRect(0,0,recordingCanvas.width,recordingCanvas.height);recordingContext.drawImage(canvas,recBox[0],recBox[1],recBox[2],recBox[3])}
+ else recordingContext.drawImage(canvas,0,0,recordingCanvas.width,recordingCanvas.height);captureAt=now;
+ if(manualFrames&&recordTrack)recordTrack.requestFrame();
+}
+recordButton.onclick=()=>{
+ if(recordStarting||savingRecording)return;
+ if(recorder&&recorder.state!=='inactive'){stopRecording();return}
+ if(typeof MediaRecorder==='undefined'||!canvas.captureStream){notify('このブラウザは録画に対応していません。端末の画面収録をお使いください。');return}
+ recordStarting=true;recordButton.disabled=true;durationSelect.disabled=true;document.querySelector('#recordQuality').disabled=true;
+ if(result.open)result.close();clearOldVideo();recordChunks=[];activeMs=0;activeSince=null;captureAt=-Infinity;recordLimit=Number(durationSelect.value)||30;
+ try{
+  const maxEdge=Number(document.querySelector('#recordQuality').value)||1080;
+  recordingCanvas=document.createElement('canvas');
+  // X などのSNSは縦横比 1:2.39〜2.39:1 しか受け付けない。柱のように細長いときは 9:16 の黒地の中央に置く
+  const asp=canvas.width/canvas.height;
+  if(asp<1/2.39||asp>2.39){const S=Math.min(maxEdge,1080),L=Math.round(S*16/9/2)*2;
+   if(asp<1){recordingCanvas.width=S;recordingCanvas.height=L}else{recordingCanvas.width=L;recordingCanvas.height=S}
+   const k=Math.min(recordingCanvas.width/canvas.width,recordingCanvas.height/canvas.height);recBox=[(recordingCanvas.width-canvas.width*k)/2,(recordingCanvas.height-canvas.height*k)/2,canvas.width*k,canvas.height*k];}
+  else{const ratio=Math.min(1,maxEdge/Math.max(canvas.width,canvas.height));recordingCanvas.width=Math.max(2,Math.round(canvas.width*ratio/2)*2);recordingCanvas.height=Math.max(2,Math.round(canvas.height*ratio/2)*2);recBox=null;}
+  recordingContext=recordingCanvas.getContext('2d',{alpha:false});if(!recordingContext)throw Error('Capture canvas unavailable');
+  recordStream=recordingCanvas.captureStream(0);recordTrack=recordStream.getVideoTracks()[0];manualFrames=!!recordTrack?.requestFrame;
+  if(!manualFrames){recordStream.getTracks().forEach(t=>t.stop());recordStream=recordingCanvas.captureStream(30);recordTrack=recordStream.getVideoTracks()[0]}
+  // X は WebM を受け付けないので、MP4（H.264）が使える端末では MP4 を優先する
+  const preferred=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1.4D4028','video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/webm;codecs=vp8','video/webm','video/mp4'];   // H.264 が確実なときだけ MP4（中身が VP9 の MP4 は X が受け付けない）
+  let chosen='';recorder=null;
+  const bitrate=Math.round(recordingCanvas.width*recordingCanvas.height*30*.16);   // 画素数に比例（1080x1920で約10Mbps）
+  for(const mimeType of preferred){if(!MediaRecorder.isTypeSupported(mimeType))continue;try{recorder=new MediaRecorder(recordStream,{mimeType,videoBitsPerSecond:bitrate});chosen=mimeType;break}catch(e){}}
+  if(!recorder)recorder=new MediaRecorder(recordStream,{videoBitsPerSecond:bitrate});
+  const current=recorder;let failure='';
+  current.ondataavailable=e=>{if(e.data&&e.data.size)recordChunks.push(e.data)};
+  current.onerror=()=>{failure='録画が中断されました。取得できた部分を保存します。';freezeRecordingClock();if(current.state!=='inactive')stopRecording(failure);else notify(failure)};
+  current.onstop=async()=>{
+   freezeRecordingClock();savingRecording=true;clearInterval(recordTimer);recordButton.disabled=true;recordStatus.textContent='保存準備中';const durationMs=activeMs;stopTracks();
+   try{
+    if(!recordChunks.length){notify('録画データを取得できませんでした。再度お試しください。');return}
+    const type=current.mimeType||recordChunks[0].type||chosen||'video/webm';let blob=new Blob(recordChunks,{type});recordChunks=[];
+    const ext=type.includes('mp4')?'mp4':'webm';if(ext==='webm')blob=await finalizeWebmDuration(blob,durationMs);
+    const filename='liquid-cosmos-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+ext;
+    recordFile=new File([blob],filename,{type});recordUrl=URL.createObjectURL(blob);download.href=recordUrl;download.download=filename;
+    const info=document.querySelector('#recordInfo');const summary=`${ext.toUpperCase()}${ext==='webm'?'（この端末はMP4録画に非対応。Xに載せるにはMP4への変換が必要）':''}${recBox?' · 9:16の黒地に配置':''} · 録画時間 ${(durationMs/1000).toFixed(1)}秒 · ${(blob.size/1048576).toFixed(1)} MB · 音声なし。`;
+    info.textContent=summary+(failure?' '+failure:'');preview.onloadedmetadata=()=>{if(Number.isFinite(preview.duration)&&preview.duration>0){info.textContent=summary+` 動画の長さ ${preview.duration.toFixed(1)}秒。`+(preview.duration*1000<durationMs-2000?' 長さが一致しないため、この画面を共有してください。':'')}};preview.src=recordUrl;
+    result.showModal();notify(failure);
+   }catch(e){notify('動画の保存準備に失敗しました。再度お試しください。');console.error(e)}finally{savingRecording=false;resetRecordingUI()}
+  };
+  if(paused)pauseBtn.click();
+  current.start();activeSince=performance.now();recordStart=activeSince;recordStarting=false;recordButton.disabled=false;recordButton.textContent='■ 録画終了';recordBar.classList.add('running');holdScreen();
+  notify(`${recordLimit>=60?Math.round(recordLimit/60)+'分':recordLimit+'秒'}で自動停止。操作ボタンは映りません。画面を離れると一時停止し、戻ると再開します。`);
+  recordTimer=setInterval(()=>{const secs=Math.floor(elapsedRecording()/1000);recordStatus.textContent=(current.state==='paused'?'一時停止 ':'')+String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0')+' / '+(recordLimit>=60?Math.round(recordLimit/60)+'分':recordLimit+'秒');if(secs>=recordLimit)stopRecording()},100);
+ }catch(e){stopTracks();recorder=null;savingRecording=false;resetRecordingUI();notify('録画を開始できませんでした。端末の画面収録をお使いください。');console.error(e)}
+};
+// claude.ai 上で開かれているときは、専用の保存API（確認ダイアログ付き）で渡す
+let claudeDownloads=null;(async()=>{try{if(window.claude&&window.claude.use)claudeDownloads=await window.claude.use('downloads')}catch(e){}})();
+download.onclick=async e=>{if(!recordUrl||!recordFile)return;
+ if(claudeDownloads){e.preventDefault();try{await claudeDownloads.save({filename:recordFile.name,data:recordFile});notify('保存しました。')}catch(err){if(err&&err.code!=='declined')notify('保存できませんでした（'+(err.code||'unknown')+'）。「共有・端末に保存」もお試しください。')}return}
+ const a=document.createElement('a');const supported='download' in a;
+ if(!supported||/iP(hone|ad|od)/.test(navigator.userAgent)){e.preventDefault();
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[recordFile]}))navigator.share({files:[recordFile],title:'Liquid Cosmos'}).catch(()=>{});
+  else window.open(recordUrl,'_blank');}};
+share.hidden=false;
+share.onclick=async()=>{if(!recordFile)return;try{await navigator.share({files:[recordFile],title:'Liquid Cosmos'})}catch(e){if(e.name!=='AbortError')document.querySelector('#recordInfo').textContent='共有できませんでした。「動画を保存」をお試しください。'}};
+document.querySelector('#closeResult').onclick=()=>{preview.pause();result.close()};result.addEventListener('close',()=>preview.pause());
+document.addEventListener('visibilitychange',()=>{
+ if(!recorder||savingRecording)return;
+ if(document.hidden&&recorder.state==='recording'){freezeRecordingClock();recorder.pause();notify('録画を一時停止しています。画面に戻ると再開します。')}
+ else if(!document.hidden&&recorder.state==='paused'){recorder.resume();activeSince=performance.now();captureAt=-Infinity;holdScreen();notify('録画を再開しました。')}
+});
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();stopRecording('描画が中断されたため、ここまでの録画を保存します。');err('描画が中断されました。保存後にページを再読み込みしてください。')});
+
+let clock=0,last=0,vclock=0,tideDays=0;
+// 乱数の種：開くたびに新しく引く。?seed=1234 か、調整パネルの「種」で同じ展開を再現できる
+let seedNow=0;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function applySeed(n){fluidInit=true;iceActive=false;iceMode=0;iceInit=true;iceLevel=0;
+ seedNow=n;const r=mulberry32(n*2654435761);
+ clock=r()*600;vclock=r()*1000;tideDays=r()*30;vortLast=vclock;simT=vclock;simAcc=0;pTide=tideDays;physRnd=mulberry32(n*7919+13);rdSeed=true;   // 時計をずらす＝模様・流れ・潮・細かい模様の出だしが変わる
+ for(const k in pairs)delete pairs[k];
+ const act=vort.slice(0,NV);
+ act.forEach((v,i)=>{
+  v.r=v.r0*(.85+.3*r());
+  for(let tries=0;tries<40;tries++){
+   v.x=(r()-.5)*1.6;v.y=(r()-.5)*2.6;
+   if(act.slice(0,i).every(o=>Math.hypot(o.x-v.x,o.y-v.y)>(o.r+v.r)*1.75+.15))break;   // 最初から重ならないように
+  }
+  v.vx=v.vy=0;v.touch=0;v.enter=0;v.spin=r()*6.283;v.lx=v.x;v.ly=v.y;v.lvx=v.lvy=0;v.px=v.x;v.py=v.y;
+ });
+ const o=document.getElementById('seed');if(o&&document.activeElement!==o)o.value=n;
+ window.__seed=n;
+}
+{const q=Number(new URLSearchParams(location.search).get('seed'));applySeed(q>0?Math.floor(q):1+Math.floor(Math.random()*99999))}
+document.getElementById('seed').onchange=e=>{const n=Math.floor(Number(e.target.value));if(n>0)applySeed(n)};
+document.getElementById('tideMode').onchange=e=>setTideMode(Number(e.target.value));
+setInterval(()=>{if(tideMode)document.getElementById('tideHud').textContent=tideReadout()},500);
+{const q=new URLSearchParams(location.search).get('tide');if(q==='tokyo'||q==='tokyo-fast'){const m=q==='tokyo'?1:2;document.getElementById('tideMode').value=m;setTideMode(m)}}
+document.getElementById('freeze').onclick=()=>{if(iceMode>0)startThaw();else startFreeze()};
+document.getElementById('reseed').onclick=()=>applySeed(1+Math.floor(Math.random()*99999));
+window.__frame=(n)=>frame(n);let frameErr=false,fpsAcc=0,fpsAt=0;
+function frame(now){try{frameRaw(now)}catch(e){if(!frameErr){frameErr=true;err('描画エラー: '+(e&&e.message||e))}}}
+function startFreeze(){if(!iceOK)return;iceMode=1;iceProg=0;iceActive=true;
+ iceSeeds.fill(0);const pts=[];for(let i=0;i<NV;i++)pts.push([coreData[i*3],coreData[i*3+1]]);
+ const ax=canvas.width/Math.min(canvas.width,canvas.height)*1.75,ay=canvas.height/Math.min(canvas.width,canvas.height)*1.75;
+ while(pts.length<4)pts.push([(Math.random()*2-1)*ax*.8,(Math.random()*2-1)*ay*.8]);
+ pts.slice(0,4).forEach((q,k)=>iceSeeds.set([q[0],q[1],1],k*3));setIceBtn()}
+function startThaw(){if(!iceActive)return;iceMode=-1;iceProg=0;setIceBtn()}
+function setIceBtn(){const b=document.getElementById('freeze');if(b){b.textContent=iceMode>0?'❄ 解かす':'❄ 凍る';b.classList.toggle('active',iceMode>0)}}
+function iceStage(liveTex,fdt){
+ if(!iceOK||!iceActive)return false;
+ iceTime+=fdt;iceProg=Math.min(1,iceProg+fdt/(iceMode>0?14:9));
+ gl.useProgram(iceP);attribFor(iceP);gl.viewport(0,0,FW,FH);
+ gl.activeTexture(gl.TEXTURE6);gl.bindTexture(gl.TEXTURE_2D,null);gl.bindFramebuffer(gl.FRAMEBUFFER,iceT2[1-iceCur].f);
+ gl.activeTexture(gl.TEXTURE6);gl.bindTexture(gl.TEXTURE_2D,iceT2[iceCur].t);gl.uniform1i(iceU.prev,6);
+ gl.uniform2f(iceU.fres,FW,FH);gl.uniform1f(iceU.dt,fdt);gl.uniform1f(iceU.mode,iceMode);gl.uniform1f(iceU.prog,iceProg);gl.uniform1f(iceU.init,iceInit?1:0);gl.uniform3fv(iceU['seeds[0]'],iceSeeds);
+ gl.drawArrays(gl.TRIANGLES,0,6);iceCur=1-iceCur;iceInit=false;
+ // 凍った色を保持
+ gl.useProgram(holdP);attribFor(holdP);gl.viewport(0,0,canvas.width,canvas.height);
+ gl.activeTexture(gl.TEXTURE7);gl.bindTexture(gl.TEXTURE_2D,null);gl.bindFramebuffer(gl.FRAMEBUFFER,heldT[1-heldCur].f);
+ gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,liveTex);gl.uniform1i(holdU.src,2);
+ gl.activeTexture(gl.TEXTURE7);gl.bindTexture(gl.TEXTURE_2D,heldT[heldCur].t);gl.uniform1i(holdU.held,7);
+ gl.activeTexture(gl.TEXTURE6);gl.bindTexture(gl.TEXTURE_2D,iceT2[iceCur].t);gl.uniform1i(holdU.ice,6);
+ gl.uniform2f(holdU.res,canvas.width,canvas.height);gl.uniform1f(holdU.reset,heldValid?0:1);
+ gl.drawArrays(gl.TRIANGLES,0,6);heldCur=1-heldCur;heldValid=true;
+ if(iceMode<0&&iceProg>=1){iceActive=false;iceMode=0;iceInit=true;setIceBtn()}   // 解け切った
+ return true}
+function iceUniforms(on){gl.uniform1f(copyU.iceOn,on?1:0);gl.uniform1f(copyU.iceT,iceTime);
+ gl.activeTexture(gl.TEXTURE7);gl.bindTexture(gl.TEXTURE_2D,on?heldT[heldCur].t:null);gl.uniform1i(copyU.held,7);
+ gl.activeTexture(gl.TEXTURE6);gl.bindTexture(gl.TEXTURE_2D,on?iceT2[iceCur].t:null);gl.uniform1i(copyU.ice,6);gl.activeTexture(gl.TEXTURE2)}
+function frameRaw(now){const dt0=Math.min((now-last)/1000,.5);iceLevel+=((iceMode>0?1:0)-iceLevel)*Math.min(1,dt0*(iceMode>0?.25:.6));const iceDt=paused?0:dt0;const dt=dt0;const slowF=1-.94*iceLevel;fdtNow=dt*slowF;
+ if(params.freezeauto>.5&&!paused){freezeAutoAt+=dt0;if(iceMode<=0&&!iceActive&&freezeAutoAt>150){freezeAutoAt=0;startFreeze()}else if(iceMode>0&&freezeAutoAt>45){freezeAutoAt=0;startThaw()}}
+last=now;fpsAcc+=1;if(now-fpsAt>1000){const f=document.getElementById('o_fps');const fpsNow=fpsAcc*1000/(now-fpsAt);if(f)f.value=Math.round(fpsNow)+' fps';{const o=document.getElementById('o_env');if(o){if(!window.__envBase){let r='?';try{const g=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');const d=g&&g.getExtension('WEBGL_debug_renderer_info');r=d?g.getParameter(d.UNMASKED_RENDERER_WEBGL):(g?g.getParameter(g.RENDERER):'?')}catch(e){}const mp4=typeof MediaRecorder!=='undefined'&&['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1.4D4028','video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1'].some(m=>MediaRecorder.isTypeSupported(m));window.__envBase=r.slice(0,60)+' · 録画 '+(mp4?'MP4(H.264)可':'MP4不可→WebM')}o.value=window.__envBase+' · '+canvas.width+'×'+canvas.height+' · '+Math.round(fpsNow)+'fps · 軽量'+(liteMode?'on':'off')}}
+ // 自動調整：3秒続けて24fpsを下回ったら、まず解像度を段階的に下げ（1440→1080→900→720）、それでも重いときだけ軽量モード（録画中と一時停止中は触らない）
+ if(!paused&&!(recorder&&recorder.state!=='inactive')&&autoTune&&!document.hidden){slowSec=fpsNow<24?slowSec+1:0;
+  if(slowSec>=3){slowSec=0;const cur=autoCap||(isMobile?1080:1440);
+   if(resChoice==='auto'&&cur>720){autoCap=cur>1080?1080:cur>900?900:720;resize();notify('描画が重いため、解像度を下げました（'+autoCap+'）。')}
+   else if(!liteMode){liteMode=true;const l=document.getElementById('lite');if(l){l.value=1;document.getElementById('o_lite').value='on（自動）'}notify('描画が重いため、軽量モードに切り替えました。')}}}fpsAcc=0;fpsAt=now;const vp=document.getElementById('o_vpos');if(vp)vp.value=vort.map(v=>v.x.toFixed(1)+','+v.y.toFixed(1)).join(' / ')+' t='+vclock.toFixed(0)}if(!paused){clock+=dt*slowF*params.speed;vclock+=dt*slowF*params.speed*params.vmove;tideDays+=dt*slowF*params.speed*params.tide/40;tideRunMs+=dt*slowF*params.speed*params.tide/40*86400000;if(tideMode===2&&tideRunMs>=86400000)tideRunMs-=86400000;stepBeat(dt*params.speed);}if(cycling&&performance.now()-cycleAt>cycleHold*1000){cycleAt=performance.now();setScene(nextScene(sceneSel))}
+ for(let i=0;i<6;i++)sceneW[i]+=((i===sceneTarget?1:0)-sceneW[i])*Math.min(1,dt*(cycling?.45:1.5));monoW+=(monoTarget-monoW)*Math.min(1,dt*(cycling?.45:1.5));pastelW+=(pastelTarget-pastelW)*Math.min(1,dt*(cycling?.45:1.5));
+ gl.useProgram(program);gl.uniform2f(U.res,canvas.width,canvas.height);gl.uniform1f(U.time,clock);scene5.set(sceneW.subarray(0,5));scene5[1]+=sceneW[5];gl.uniform1fv(U['scene[0]'],scene5);gl.uniform1fv(U['sceneP[0]'],sceneW);gl.uniform1f(U.cellAmt,params.cell);gl.uniform1f(U.reliefAmt,params.relief);gl.uniform1f(U.ridgeAmt,params.ridge);gl.uniform1f(U.reflectAmt,params.reflect);gl.uniform1f(U.specAmt,params.spec);gl.uniform1f(U.lensAmt,params.lens);gl.uniform1f(U.tideT,tideDays);gl.uniform1f(U.tideAmt,params.tideamt);gl.uniform1f(U.waveAmt,params.waveamt);gl.uniform1f(U.nonlin,params.nonlin);gl.uniform3fv(U['cores[0]'],cores(vclock));gl.uniform2fv(U['vels[0]'],velData);gl.uniform1fv(U['spins[0]'],spinData);gl.uniform2fv(U['lagCores[0]'],lagData);updateTide();gl.uniform1fv(U['tidePh[0]'],tidePhA);gl.uniform1fv(U['tideA[0]'],tideAA);gl.uniform1f(U.tideLvl,tideMode>0?tideLvlV:0);gl.uniform1f(U.wrapW,params.wrap>.5?canvas.width/Math.min(canvas.width,canvas.height)*3.5:0);gl.uniform1f(U.pulse,pulseVal);gl.uniform1f(U.peri,periPhase);
+ // 1) 反応拡散を数ステップ進める
+ if(!paused||rdSeed){gl.useProgram(rdP);attribFor(rdP);gl.viewport(0,0,RD,RD);
+  const F=.034+.004*sceneW[2]-.004*sceneW[3],K=.062-.004*sceneW[2]+.002*sceneW[4];
+  for(let k=0;k<rdPer;k++){gl.bindFramebuffer(gl.FRAMEBUFFER,rdT[1-rdCur].f);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,rdT[rdCur].t);gl.uniform1i(rdU.rd,1);gl.uniform2f(rdU.rdRes,RD,RD);gl.uniform1f(rdU.F,F);gl.uniform1f(rdU.K,K);gl.uniform1f(rdU.seed,rdSeed?1:0);gl.uniform1f(rdU.time,clock);gl.uniform1f(rdU.flowT,clock);gl.drawArrays(gl.TRIANGLES,0,6);rdSeed=false;rdCur=1-rdCur;rdSteps++}}
+ // 1.5) 流体の地図を運ぶ
+ if(fluidOK&&params.fluid>.01){gl.useProgram(fluidP);attribFor(fluidP);gl.viewport(0,0,FW,FH);
+  const fdt=paused?0:Math.min(fdtNow,.1)*params.speed*params.vmove*.5;const W=canvas.width/Math.min(canvas.width,canvas.height)*3.5;
+  const dth=vclock*.031+1.3*Math.sin(vclock*.011);
+  gl.activeTexture(gl.TEXTURE5);gl.bindTexture(gl.TEXTURE_2D,null);gl.bindFramebuffer(gl.FRAMEBUFFER,fluidT[1-fluidCur].f);gl.activeTexture(gl.TEXTURE5);gl.bindTexture(gl.TEXTURE_2D,fluidT[fluidCur].t);
+  gl.uniform1i(fluidU.prev,5);gl.uniform2f(fluidU.fres,FW,FH);gl.uniform2f(fluidU.drift,.10*Math.cos(dth)*params.flow*.2,.10*Math.sin(dth)*params.flow*.2);gl.uniform1f(fluidU.dt,fdt);gl.uniform1f(fluidU.init,fluidInit?1:0);
+  gl.uniform1f(fluidU.relax,1-Math.exp(-fdt*.22));gl.uniform1f(fluidU.wrapW,params.wrap>.5?W:0);gl.uniform1f(fluidU.time,vclock);gl.uniform1f(fluidU.swirlK,.010*params.flow);gl.uniform3fv(fluidU['cores[0]'],coreData);
+  gl.drawArrays(gl.TRIANGLES,0,6);fluidCur=1-fluidCur;fluidInit=false;}
+ // 2) シーンを FBO に描く（半画素のジッター）
+ gl.useProgram(program);attribFor(program);gl.bindFramebuffer(gl.FRAMEBUFFER,taaOn?sceneT.f:null);gl.viewport(0,0,canvas.width,canvas.height);
+ const jit=taaOn?HALTON[jIdx%8]:[.5,.5];jIdx++;gl.uniform2f(U.jitter,jit[0]-.5,jit[1]-.5);
+ gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,rdT[rdCur].t);gl.uniform1i(U.rdTex,1);gl.uniform1f(U.rdAmt,params.rdamt);gl.uniform1f(U.lite,liteMode?1:0);gl.uniform1f(U.pigAmt,params.pig);gl.uniform1f(U.sparkAmt,params.spark);gl.uniform1f(U.detailAmt,params.detail);gl.uniform1f(U.ledAmt,params.led);gl.uniform1f(U.sparkT,performance.now()/1000);gl.uniform1f(U.depthAmt,params.depth);gl.uniform1f(U.boilAmt,params.boil);gl.uniform1f(U.flowK,params.flow);gl.uniform1f(U.glowAmt,params.glow);gl.uniform1f(U.monoAmt,monoW);gl.uniform1f(U.pastelAmt,pastelW);gl.uniform1f(U.liquidAmt,params.liquid);gl.activeTexture(gl.TEXTURE5);gl.bindTexture(gl.TEXTURE_2D,fluidOK?fluidT[fluidCur].t:null);gl.uniform1i(U.fluidTex,5);gl.uniform1f(U.fluidAmt,fluidOK?params.fluid:0);
+ // 1パス目：高さの地図
+ // 高さの地図を書く前に、読み込み側のつながりを外す（自分を読みながら書くと、WebGLは描画を黙って捨てる）
+ // 高さの地図は1コマおきに更新（模様の動きは1コマで1〜2画素なので、ずれは見えない。描画の約2割が浮く）
+ if(!hValid||(hTick++&1)===0){hValid=true;
+ gl.activeTexture(gl.TEXTURE4);gl.bindTexture(gl.TEXTURE_2D,null);
+ gl.bindFramebuffer(gl.FRAMEBUFFER,heightT.f);gl.uniform1f(U.heightPass,1);gl.drawArrays(gl.TRIANGLES,0,6);}
+ // 2パス目：本体
+ gl.bindFramebuffer(gl.FRAMEBUFFER,sceneT.f);gl.uniform1f(U.heightPass,0);
+ gl.activeTexture(gl.TEXTURE4);gl.bindTexture(gl.TEXTURE_2D,heightT.t);gl.uniform1i(U.hTex,4);
+ gl.drawArrays(gl.TRIANGLES,0,6);
+ if(taaOn){
+  // 3) 履歴と混ぜる
+  gl.useProgram(taaP);attribFor(taaP);gl.bindFramebuffer(gl.FRAMEBUFFER,histT[1-histCur].f);
+  gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,sceneT.t);gl.uniform1i(taaU.cur,2);
+  gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,histValid?histT[histCur].t:sceneT.t);gl.uniform1i(taaU.hist,3);
+  gl.uniform2f(taaU.res,canvas.width,canvas.height);gl.uniform1f(taaU.alpha,histValid?(paused?.08:.18):1.);
+  gl.drawArrays(gl.TRIANGLES,0,6);histCur=1-histCur;histValid=true;
+  // 4) 画面へ
+  const iceOn1=iceStage(histT[histCur].t,iceDt);
+  gl.useProgram(copyP);attribFor(copyP);gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,histT[histCur].t);gl.uniform1i(copyU.src,2);gl.uniform2f(copyU.res,canvas.width,canvas.height);gl.uniform1f(copyU.glow,params.glow);gl.uniform1f(copyU.sharp,sceneW[5]*(1-monoW));iceUniforms(iceOn1);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,taaOn?histT[histCur].t:sceneT.t);gl.drawArrays(gl.TRIANGLES,0,6);
+ }
+ else{
+  const iceOn1=iceStage(sceneT.t,iceDt);
+  gl.useProgram(copyP);attribFor(copyP);gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,sceneT.t);gl.uniform1i(copyU.src,2);gl.uniform2f(copyU.res,canvas.width,canvas.height);gl.uniform1f(copyU.glow,params.glow);gl.uniform1f(copyU.sharp,sceneW[5]*(1-monoW));iceUniforms(iceOn1);gl.activeTexture(gl.TEXTURE2);gl.bindTexture(gl.TEXTURE_2D,taaOn?histT[histCur].t:sceneT.t);gl.drawArrays(gl.TRIANGLES,0,6);
+ }
+ captureRecordingFrame(now);if(!window.__manual)requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();err('GPUが描画を中断しました（負荷が高すぎます）。軽量モードをonにして再読み込みしてください。')},{once:false});
+})();
+</script></body></html>
